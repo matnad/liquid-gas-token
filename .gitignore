@@ -1,0 +1,12 @@
+__pycache__
+.idea/
+.history
+.hypothesis/
+build/
+reports/
+notebooks/
+archive/
+
+contracts/LGTDeployer.sol
+contracts/TestHelper.sol
+contracts/GST.sol
