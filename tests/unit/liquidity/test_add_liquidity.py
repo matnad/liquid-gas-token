@@ -2,6 +2,7 @@ from brownie import *
 import brownie
 
 
+# TODO: Parametrize
 def test_add_first_liquidity(lgt, accounts):
     assert lgt.ownedSupply() == 30
     assert lgt.poolTotalSupply() == 0
@@ -16,6 +17,7 @@ def test_add_first_liquidity(lgt, accounts):
     assert lgt.poolTotalSupply() == Wei("0.5 ether")
 
 
+# TODO: Parametrize
 def test_add_liquidity_eth_constraint(lgt, accounts):
     lgt.addLiquidity(0, 10, 99999999999, {'from': accounts[0], 'value': "0.5 ether"})
     lgt.mint(15, {'from': accounts[1]})
@@ -36,6 +38,7 @@ def test_add_liquidity_eth_constraint(lgt, accounts):
     assert lgt.ownedSupply() == 20 + 15 - 3
 
 
+# TODO: Parametrize
 def test_add_liquidity_exact(lgt, accounts):
     lgt.addLiquidity(0, 10, 99999999999, {'from': accounts[0], 'value': "0.5 ether"})
     lgt.mint(15, {'from': accounts[1]})
@@ -44,7 +47,7 @@ def test_add_liquidity_exact(lgt, accounts):
     # uint256 tokenReserve = totalSupply() - ownedSupply(); -> 10
     # uint256 tokenAmount = msg.value.mul(tokenReserve).div(ethReserve).add(1); 0.7 * 10 / 0.5 + 1 = 7 / 0.5 + 1 = 15
     # uint256 liquidityCreated = msg.value.mul(totalLiquidity).div(ethReserve); 0.7 * 0.5 / 0.5 = 0.7
-    # Should add 0.35 ether and 15 tokens to liquidity
+    # Should add 0.7 ether and 15 tokens to liquidity
     assert tx.return_value == Wei("0.7 ether")
     assert lgt.poolTotalSupply() == Wei("1.2 ether")
     assert lgt.balanceOf(accounts[1]) == 0

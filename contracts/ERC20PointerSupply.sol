@@ -12,12 +12,12 @@ contract ERC20PointerSupply is IERC20 {
     // ****** ERC20 Pointer Supply Token
     //        --------------------------
 
-    mapping (address => uint256) private _balances;
-    mapping (address => mapping (address => uint256)) private _allowances;
+    mapping (address => uint256) internal _balances;
+    mapping (address => mapping (address => uint256)) internal _allowances;
 
-    uint256 private _ownedSupply;
-    uint256 private _totalBurned;
-    uint256 private _totalMinted;
+    uint256 internal _ownedSupply;
+    uint256 internal _totalBurned;
+    uint256 internal _totalMinted;
 
     string constant public name = "Liquid Gas Token";
     string constant public symbol = "LGT";
@@ -28,7 +28,7 @@ contract ERC20PointerSupply is IERC20 {
     ///      from the burned and minted tokens instead of stored in its own variable.
     /// @return Total number of tokens in circulation.
     function totalSupply() public view override returns (uint256) {
-        return _totalMinted - _totalBurned;
+        return _totalMinted.sub(_totalBurned);
     }
 
     /// @notice Return the number of tokens owned by specific addresses.
@@ -154,7 +154,7 @@ contract ERC20PointerSupply is IERC20 {
         require(recipient != address(0), "ERC20: transfer to the zero address");
 
         _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
-        _balances[recipient] = _balances[recipient].add(amount);
+        _balances[recipient] += amount;
         emit Transfer(sender, recipient, amount);
     }
 
@@ -164,62 +164,5 @@ contract ERC20PointerSupply is IERC20 {
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
-    }
-
-    // ****** Internal Functions for Minting and Burning.
-    //        -------------------------------------------
-    //        These functions make sure the different supply- and balance
-    //        variables are updated properly.
-
-    function totalBurned() internal view returns (uint256) {
-        return _totalBurned;
-    }
-
-    function totalMinted() internal view returns (uint256) {
-        return _totalMinted;
-    }
-
-    /// @dev Will transfer ownership of tokens from this contract to an account.
-    function _assign(address account, uint256 amount) internal {
-        _balances[account] += amount;
-        _ownedSupply += amount;
-    }
-
-    /// @dev Will transfer implicit ownership of tokens to this contract.
-    function _unassign(address account, uint256 amount) internal {
-        _balances[account] = _balances[account].sub(
-            amount, "ERC20: unassign amount exceeds balance"
-        );
-        _ownedSupply = _ownedSupply.sub(amount);
-    }
-
-    function _mint_unowned(uint256 amount) internal {
-        _totalMinted += amount;
-    }
-
-    function _mint(address account, uint256 amount) internal {
-        _totalMinted += amount;
-        _assign(account, amount);
-    }
-
-    function _burn_unowned(uint256 amount) internal {
-        _totalBurned += amount;
-    }
-
-    function _burn(address account, uint256 amount) internal {
-        _totalBurned += amount;
-        _unassign(account, amount);
-    }
-
-    function _burnFrom(address account, uint256 amount) internal {
-        _totalBurned += amount;
-        _unassign(account, amount);
-        _approve(
-            account,
-            msg.sender,
-            _allowances[account][msg.sender].sub(
-                amount, "ERC20: burn amount exceeds allowance"
-            )
-        );
     }
 }

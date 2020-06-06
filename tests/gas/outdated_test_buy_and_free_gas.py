@@ -1,6 +1,9 @@
 import pytest
 from brownie import *
 
+
+""" THESE TESTS ARE OUTDATED!! """
+
 BURN = 1e6
 FREE = 25
 

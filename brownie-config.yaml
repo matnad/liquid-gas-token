@@ -1,2 +1,3 @@
 # automatically fetch contract sources from Etherscan
-autofetch_sources: True
+autofetch_sources: true
+dev_deployment_artifacts: true

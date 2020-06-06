@@ -4,7 +4,7 @@ import pytest
 from brownie import project
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def liquid_lgt(lgt, accounts):
     lgt.mint(150, {'from': accounts[0]})
     lgt.addLiquidity(0, 150, 99999999999, {'from': accounts[0], 'value': "1.1 ether"})
@@ -13,14 +13,14 @@ def liquid_lgt(lgt, accounts):
     yield lgt
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def uniswap_gst():
     interface = project.get_loaded_projects()[0].interface
     # yield Contract.from_explorer("0x929507CD3D90Ab11eC4822E9eB5A48eb3a178F19")
     yield interface.UniswapExchangeInterface("0x929507CD3D90Ab11eC4822E9eB5A48eb3a178F19")
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def gst2(accounts):
     interface = project.get_loaded_projects()[0].interface
     gst = interface.IGST("0x0000000000b3F879cb30FE243b4Dfee438691c04")
@@ -29,7 +29,7 @@ def gst2(accounts):
     yield gst
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def chi(accounts):
     interface = project.get_loaded_projects()[0].interface
     chi = interface.IGST("0x0000000000004946c0e9F43F4Dee607b0eF1fA1c")
@@ -38,7 +38,7 @@ def chi(accounts):
     yield chi
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def uniswap_chi(chi, accounts):
     interface = project.get_loaded_projects()[0].interface
     # Fund the chi exchange
@@ -49,7 +49,7 @@ def uniswap_chi(chi, accounts):
     yield unichi
 
 
-@pytest.fixture()
+@pytest.fixture(scope="module")
 def helper(LgtHelper, gst2, liquid_lgt, chi, accounts):
     lgtHelper = accounts[0].deploy(LgtHelper)
     for a in accounts[:6]:

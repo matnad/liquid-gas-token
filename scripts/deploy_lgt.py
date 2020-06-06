@@ -5,6 +5,7 @@ from brownie import *
 
 
 def deploy_lgt():
+    """Deploys LGT at a 15 byte address."""
     rpc.reset()
 
     lgt_deployer_pk = os.getenv("LGT_DEPLOYER")
