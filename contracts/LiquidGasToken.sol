@@ -174,18 +174,17 @@ contract LiquidGasToken is LiquidERC20 {
 
         // calculate optimum values for tokens and ether to add
         uint256 totalLiquidity = _poolTotalSupply;
-        // uint256 totalMinted = _totalMinted; //stack too deep, this would save ~800 gas
+        uint256 totalMinted = _totalMinted;
         tokenAmount = maxTokens;
         if (totalLiquidity != 0) {
-            uint256 ethReserve = address(this).balance - msg.value;
-            uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
-            ethAmount = maxTokens.mul(ethReserve).div(tokenReserve).sub(1);
+            uint256 tokenReserve = totalMinted.sub(_totalBurned).sub(_ownedSupply);
+            ethAmount = maxTokens.mul(address(this).balance - msg.value).div(tokenReserve).sub(1);
             if (ethAmount > msg.value) {
                 // reduce amount of tokens minted to provide maximum possible liquidity
-                tokenAmount = (msg.value.add(1)).mul(tokenReserve).div(ethReserve);
-                ethAmount = tokenAmount.mul(ethReserve).div(tokenReserve).sub(1);
+                tokenAmount = (msg.value.add(1)).mul(tokenReserve).div(address(this).balance - msg.value);
+                ethAmount = tokenAmount.mul(address(this).balance - msg.value).div(tokenReserve).sub(1);
             }
-            liquidityCreated = ethAmount.mul(totalLiquidity).div(ethReserve);
+            liquidityCreated = ethAmount.mul(totalLiquidity).div(address(this).balance - msg.value);
             require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
         } else {
             require(msg.value > 1000000000); // dev: initial eth below 1 gwei
@@ -194,7 +193,7 @@ contract LiquidGasToken is LiquidERC20 {
         }
 
         // Mint tokens directly to the liquidity pool
-        _createContracts(tokenAmount, _totalMinted);
+        _createContracts(tokenAmount, totalMinted);
 
         // Create liquidity shares for recipient
         _poolTotalSupply += liquidityCreated;
