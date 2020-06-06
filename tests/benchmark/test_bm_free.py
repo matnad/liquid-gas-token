@@ -15,10 +15,10 @@ def test_setup(liquid_lgt, accounts):
 
 @pytest.mark.parametrize(
     "params", [
-        {'burn': 1e5, 'free': 4, 'gas': 86667},
-        {'burn': 5e5, 'free': 12, 'gas': 332160},
-        {'burn': 1e6, 'free': 25, 'gas': 598146},
-        {'burn': 2e6, 'free': 50, 'gas': 1171334},
+        {'burn': 1e5, 'free': 4, 'gas': 86623},
+        {'burn': 5e5, 'free': 12, 'gas': 332072},
+        {'burn': 1e6, 'free': 25, 'gas': 598102},
+        {'burn': 2e6, 'free': 50, 'gas': 1171290},
     ]
 )
 def test_burn_and_free_from(liquid_lgt, helper, accounts, params):
@@ -31,10 +31,10 @@ def test_burn_and_free_from(liquid_lgt, helper, accounts, params):
 
 @pytest.mark.parametrize(
     "params", [
-        {'burn': 1e5, 'free': 4, 'gas': 81613},
-        {'burn': 5e5, 'free': 12, 'gas': 322051},
-        {'burn': 1e6, 'free': 25, 'gas': 593092},
-        {'burn': 2e6, 'free': 50, 'gas': 1166279},
+        {'burn': 1e5, 'free': 4, 'gas': 81582},
+        {'burn': 5e5, 'free': 12, 'gas': 321990},
+        {'burn': 1e6, 'free': 25, 'gas': 593061},
+        {'burn': 2e6, 'free': 50, 'gas': 1166249},
     ]
 )
 def test_burn_buy_and_free_exact(liquid_lgt, helper, accounts, params):
@@ -49,10 +49,10 @@ def test_burn_buy_and_free_exact(liquid_lgt, helper, accounts, params):
 
 @pytest.mark.parametrize(
     "params", [
-        {'burn': 1e5, 'free': 4, 'gas': 81466},
-        {'burn': 5e5, 'free': 12, 'gas': 321758},
-        {'burn': 1e6, 'free': 25, 'gas': 592945},
-        {'burn': 2e6, 'free': 50, 'gas': 1166133},
+        {'burn': 1e5, 'free': 4, 'gas': 81461},
+        {'burn': 5e5, 'free': 12, 'gas': 321748},
+        {'burn': 1e6, 'free': 25, 'gas': 592940},
+        {'burn': 2e6, 'free': 50, 'gas': 1166128},
     ]
 )
 def test_burn_buy_up_to_and_free(liquid_lgt, helper, accounts, params):
