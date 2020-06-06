@@ -177,7 +177,7 @@ contract LiquidGasToken is LiquidERC20 {
         // uint256 totalMinted = _totalMinted; //stack too deep, this would save ~800 gas
         tokenAmount = maxTokens;
         if (totalLiquidity != 0) {
-            uint256 ethReserve = address(this).balance.sub(msg.value);
+            uint256 ethReserve = address(this).balance - msg.value;
             uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
             ethAmount = maxTokens.mul(ethReserve).div(tokenReserve).sub(1);
             if (ethAmount > msg.value) {
@@ -346,7 +346,7 @@ contract LiquidGasToken is LiquidERC20 {
         if (tokenReserve < amount) {
             return 0;
         }
-        uint256 ethReserve = address(this).balance.sub(msg.value);
+        uint256 ethReserve = address(this).balance - msg.value;
         uint256 ethSold = getOutputPrice(amount, ethReserve, tokenReserve);
         if (msg.value < ethSold) {
             return 0;
@@ -375,7 +375,7 @@ contract LiquidGasToken is LiquidERC20 {
         if (maxTokens == 0 || deadline <= now) {
             return 0;
         }
-        uint256 ethReserve = address(this).balance.sub(msg.value);
+        uint256 ethReserve = address(this).balance - msg.value;
         uint256 totalBurned = _totalBurned;
         uint256 tokenReserve = _totalMinted.sub(totalBurned).sub(_ownedSupply);
         uint256 tokensBought = getInputPrice(msg.value, ethReserve, tokenReserve);

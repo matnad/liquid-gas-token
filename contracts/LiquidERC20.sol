@@ -74,7 +74,7 @@ contract LiquidERC20 is ERC20PointerSupply {
 
         if (totalLiquidity != 0) {
             require(minLiquidity != 0); // dev: no min_liquidity specified
-            uint256 ethReserve = address(this).balance.sub(msg.value);
+            uint256 ethReserve = address(this).balance - msg.value;
             uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
             uint256 tokenAmount = msg.value.mul(tokenReserve).div(ethReserve).add(1);
             uint256 liquidityCreated = msg.value.mul(totalLiquidity).div(ethReserve);
