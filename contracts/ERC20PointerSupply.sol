@@ -107,7 +107,7 @@ contract ERC20PointerSupply is IERC20 {
         _approve(
             sender,
             msg.sender,
-            _allowances[sender][msg.sender].sub(amount, "ERC20: transfer amount exceeds allowance")
+            _allowances[sender][msg.sender].sub(amount, "ERC20: exceeds allowance")
         );
         return true;
     }
@@ -140,7 +140,7 @@ contract ERC20PointerSupply is IERC20 {
         _approve(
             msg.sender,
             spender,
-            _allowances[msg.sender][spender].sub(subtractedValue, "ERC20: decreased allowance below zero")
+            _allowances[msg.sender][spender].sub(subtractedValue, "ERC20: allowance below zero")
         );
         return true;
     }
@@ -150,17 +150,14 @@ contract ERC20PointerSupply is IERC20 {
     //        ------------------------
 
     function _transfer(address sender, address recipient, uint256 amount) internal virtual {
-        require(sender != address(0), "ERC20: transfer from the zero address");
-        require(recipient != address(0), "ERC20: transfer to the zero address");
+        require(recipient != address(0), "ERC20: transfer to zero address");
 
-        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer amount exceeds balance");
+        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer exceeds balance");
         _balances[recipient] += amount;
         emit Transfer(sender, recipient, amount);
     }
 
     function _approve(address owner, address spender, uint256 amount) internal virtual {
-        require(owner != address(0), "ERC20: approve from the zero address");
-        require(spender != address(0), "ERC20: approve to the zero address");
 
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
