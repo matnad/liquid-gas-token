@@ -1,0 +1,47 @@
+on:
+  push:
+  pull_request:
+  schedule:
+    # run this workflow every Monday at 1PM UTC
+    - cron: "* 13 * * 1"
+
+name: main workflow
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  LGT_DEPLOYER: ${{ secrets.LGT_DEPLOYER }}
+  WEB3_INFURA_PROJECT_ID: 0888c9df49d74a52b6c400eeeda9debf
+
+jobs:
+
+  tests:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v1
+
+    - name: Cache Solidity Installations
+      uses: actions/cache@v1
+      with:
+        path: ~/.solcx
+        key: ${{ runner.os }}-solcx-cache
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v1
+
+    - name: Install Ganache
+      run: npm install -g ganache-cli@6.9.1
+
+    - name: Setup Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
+    - name: Install Requirements
+      run: pip install -r requirements.txt
+
+    - name: Run Unit Tests
+      run: brownie test tests/unit/ -w
+
+    - name: Run Gas Tests
+      run: brownie test tests/gas/ -s -w --network mainnet-fork
