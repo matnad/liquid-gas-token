@@ -176,7 +176,6 @@ contract LiquidGasToken is LiquidERC20 {
         uint256 totalLiquidity = _poolTotalSupply;
         // uint256 totalMinted = _totalMinted; //stack too deep, this would save ~800 gas
         tokenAmount = maxTokens;
-        ethAmount = msg.value;
         if (totalLiquidity != 0) {
             uint256 ethReserve = address(this).balance.sub(msg.value);
             uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
@@ -191,6 +190,7 @@ contract LiquidGasToken is LiquidERC20 {
         } else {
             require(msg.value > 1000000000); // dev: initial eth below 1 gwei
             liquidityCreated = address(this).balance;
+            ethAmount = msg.value;
         }
 
         // Mint tokens directly to the liquidity pool
