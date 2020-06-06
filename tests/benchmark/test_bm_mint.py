@@ -9,9 +9,9 @@ def print_benchmark(used, benchmark):
     if used == benchmark:
         print(f"[ {color('bright yellow')}BENCHMARK MATCHED {color}]")
     elif used < benchmark:
-        print(f"[ {color('bright green')}BENCHMARK BEATEN{color} ]")
+        print(f"[ {color('dark green')}BENCHMARK BEATEN BY {benchmark-used}{color} ]")
     else:
-        print(f"[ {color('bright red')}BENCHMARK MISSED{color} ]")
+        print(f"[ {color('bright red')}BENCHMARK MISSED BY {used-benchmark}{color} ]")
 
 
 def test_setup(liquid_lgt, accounts):
