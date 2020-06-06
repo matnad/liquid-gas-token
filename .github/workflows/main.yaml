@@ -14,7 +14,7 @@ env:
 
 jobs:
 
-  tests:
+  Tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +44,39 @@ jobs:
       run: brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.1
 
     - name: Run Unit Tests
-      run: brownie test tests/unit/ -w
+      run: brownie test tests/unit/ -w -n 8
 
     - name: Run Gas Tests
       run: brownie test tests/gas/ -s -w --network mainnet-fork
+
+  Benchmarks:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v1
+
+      - name: Cache Solidity Installations
+        uses: actions/cache@v1
+        with:
+          path: ~/.solcx
+          key: ${{ runner.os }}-solcx-cache
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v1
+
+      - name: Install Ganache
+        run: npm install -g ganache-cli@6.9.1
+
+      - name: Setup Python 3.8
+        uses: actions/setup-python@v1
+        with:
+          python-version: 3.8
+
+      - name: Install Requirements
+        run: pip install -r requirements.txt
+
+      - name: Install dependencies
+        run: brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.1
+
+      - name: Run Benchmarks
+        run: brownie test tests/benchmark/ -s -w --network mainnet-fork
