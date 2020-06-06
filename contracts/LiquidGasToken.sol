@@ -169,15 +169,15 @@ contract LiquidGasToken is LiquidERC20 {
         returns (uint256 tokenAmount, uint256 ethAmount, uint256 liquidityCreated)
     {
         require(deadline >= now); // dev: deadline passed
-        require(maxTokens > 0); // dev: can't mint less than 1 token
-        require(msg.value > 0); // dev: must provide ether to add liquidity
+        require(maxTokens != 0); // dev: can't mint less than 1 token
+        require(msg.value != 0); // dev: must provide ether to add liquidity
 
         // calculate optimum values for tokens and ether to add
         uint256 totalLiquidity = _poolTotalSupply;
         // uint256 totalMinted = _totalMinted; //stack too deep, this would save ~800 gas
         tokenAmount = maxTokens;
         ethAmount = msg.value;
-        if (totalLiquidity > 0) {
+        if (totalLiquidity != 0) {
             uint256 ethReserve = address(this).balance.sub(msg.value);
             uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
             ethAmount = maxTokens.mul(ethReserve).div(tokenReserve).sub(1);
@@ -234,7 +234,7 @@ contract LiquidGasToken is LiquidERC20 {
         returns (uint256)
     {
         require(deadline >= now); // dev: deadline passed
-        require(amount > 0); // dev: must sell one or more tokens
+        require(amount != 0); // dev: must sell one or more tokens
         uint256 totalMinted = _totalMinted;
         uint256 tokenReserve = totalMinted.sub(_totalBurned).sub(_ownedSupply);
         uint256 ethBought = getInputPrice(amount, tokenReserve, address(this).balance);
@@ -263,7 +263,7 @@ contract LiquidGasToken is LiquidERC20 {
         returns (uint256)
     {
         require(deadline >= now); // dev: deadline passed
-        require(amount > 0); // dev: must sell one or more tokens
+        require(amount != 0); // dev: must sell one or more tokens
         uint256 totalMinted = _totalMinted;
         uint256 tokenReserve = totalMinted.sub(_totalBurned).sub(_ownedSupply);
         uint256 ethBought = getInputPrice(amount, tokenReserve, address(this).balance);
@@ -338,7 +338,7 @@ contract LiquidGasToken is LiquidERC20 {
         payable
         returns (uint256)
     {
-        if (deadline <= now || amount <= 0) {
+        if (amount == 0 || deadline <= now) {
             return 0;
         }
         uint256 totalBurned = _totalBurned;
@@ -353,7 +353,7 @@ contract LiquidGasToken is LiquidERC20 {
         }
         uint256 ethRefund = msg.value - ethSold;
         _destroyContracts(amount, totalBurned);
-        if (ethRefund > 0) {
+        if (ethRefund != 0) {
             refundTo.transfer(ethRefund);
         }
         return ethSold;
@@ -372,14 +372,14 @@ contract LiquidGasToken is LiquidERC20 {
         payable
         returns (uint256)
     {
-        if (deadline <= now || maxTokens <= 0) {
+        if (maxTokens == 0 || deadline <= now) {
             return 0;
         }
         uint256 ethReserve = address(this).balance.sub(msg.value);
         uint256 totalBurned = _totalBurned;
         uint256 tokenReserve = _totalMinted.sub(totalBurned).sub(_ownedSupply);
         uint256 tokensBought = getInputPrice(msg.value, ethReserve, tokenReserve);
-        if (tokensBought <= 0) {
+        if (tokensBought == 0) {
             return 0;
         } else if (tokensBought > maxTokens) {
             tokensBought = maxTokens;
