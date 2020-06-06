@@ -177,14 +177,14 @@ contract LiquidGasToken is LiquidERC20 {
         uint256 totalMinted = _totalMinted;
         tokenAmount = maxTokens;
         if (totalLiquidity != 0) {
-            uint256 tokenReserve = totalMinted.sub(_totalBurned).sub(_ownedSupply);
+            uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
             ethAmount = maxTokens.mul(address(this).balance - msg.value).div(tokenReserve).sub(1);
             if (ethAmount > msg.value) {
                 // reduce amount of tokens minted to provide maximum possible liquidity
-                tokenAmount = (msg.value.add(1)).mul(tokenReserve).div(address(this).balance - msg.value);
+                tokenAmount = (msg.value + 1).mul(tokenReserve) / (address(this).balance - msg.value);
                 ethAmount = tokenAmount.mul(address(this).balance - msg.value).div(tokenReserve).sub(1);
             }
-            liquidityCreated = ethAmount.mul(totalLiquidity).div(address(this).balance - msg.value);
+            liquidityCreated = ethAmount.mul(totalLiquidity) / (address(this).balance - msg.value);
             require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
         } else {
             require(msg.value > 1000000000); // dev: initial eth below 1 gwei
@@ -235,7 +235,7 @@ contract LiquidGasToken is LiquidERC20 {
         require(deadline >= now); // dev: deadline passed
         require(amount != 0); // dev: must sell one or more tokens
         uint256 totalMinted = _totalMinted;
-        uint256 tokenReserve = totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethBought = getInputPrice(amount, tokenReserve, address(this).balance);
         require(ethBought >= minEth); // dev: tokens not worth enough
         _createContracts(amount, totalMinted);
@@ -264,7 +264,7 @@ contract LiquidGasToken is LiquidERC20 {
         require(deadline >= now); // dev: deadline passed
         require(amount != 0); // dev: must sell one or more tokens
         uint256 totalMinted = _totalMinted;
-        uint256 tokenReserve = totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethBought = getInputPrice(amount, tokenReserve, address(this).balance);
         require(ethBought >= minEth); // dev: tokens not worth enough
         _createContracts(amount, totalMinted);
@@ -341,7 +341,7 @@ contract LiquidGasToken is LiquidERC20 {
             return 0;
         }
         uint256 totalBurned = _totalBurned;
-        uint256 tokenReserve = _totalMinted.sub(totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
         if (tokenReserve < amount) {
             return 0;
         }
@@ -376,7 +376,7 @@ contract LiquidGasToken is LiquidERC20 {
         }
         uint256 ethReserve = address(this).balance - msg.value;
         uint256 totalBurned = _totalBurned;
-        uint256 tokenReserve = _totalMinted.sub(totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
         uint256 tokensBought = getInputPrice(msg.value, ethReserve, tokenReserve);
         if (tokensBought == 0) {
             return 0;

@@ -47,7 +47,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///      The total supply and the privately owned supply of the token.
     /// @return The amount of tokens in the liquidity pool.
     function poolTokenReserves() external view returns (uint256) {
-        return _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        return _totalMinted.sub(_totalBurned + _ownedSupply);
     }
 
     /// @notice Add liquidity to the pool and receive liquidity shares. Must deposit
@@ -75,7 +75,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         if (totalLiquidity != 0) {
             require(minLiquidity != 0); // dev: no min_liquidity specified
             uint256 ethReserve = address(this).balance - msg.value;
-            uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+            uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
             uint256 tokenAmount = msg.value.mul(tokenReserve).div(ethReserve).add(1);
             uint256 liquidityCreated = msg.value.mul(totalLiquidity).div(ethReserve);
             require(maxTokens >= tokenAmount); // dev: need more tokens
@@ -136,7 +136,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(minTokens != 0); // dev: must remove positive token amount
         uint256 totalLiquidity = _poolTotalSupply;
         require(totalLiquidity != 0); // dev: no liquidity to remove
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethAmount = amount.mul(address(this).balance).div(totalLiquidity);
         uint256 tokenAmount = amount.mul(tokenReserve).div(totalLiquidity);
         require(ethAmount >= minEth); // dev: can't remove enough eth
@@ -190,7 +190,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(outputReserve != 0); // dev: no outputReserve provided
         uint256 numerator = inputReserve.mul(outputAmount).mul(1000);
         uint256 denominator = outputReserve.sub(outputAmount).mul(995);
-        return numerator.div(denominator).add(1);
+        return (numerator / denominator).add(1);
     }
 
     // ***** Trade Ether to Tokens
@@ -210,7 +210,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(ethSold != 0); // dev: no eth to sell
         require(minTokens != 0); // dev: must buy one or more tokens
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethReserve = address(this).balance.sub(ethSold);
         uint256 tokensBought = getInputPrice(ethSold, ethReserve, tokenReserve);
         require(tokensBought >= minTokens); // dev: not enough eth to buy tokens
@@ -279,7 +279,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(tokensBought != 0); // dev: must buy one or more tokens
         require(maxEth != 0); // dev: maxEth must greater than 0
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethReserve = address(this).balance.sub(maxEth);
         uint256 ethSold = getOutputPrice(tokensBought, ethReserve, tokenReserve);
         uint256 ethRefund = maxEth.sub(ethSold, "LGT: not enough ETH to buy tokens");
@@ -346,7 +346,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(tokensSold != 0); // dev: must sell one or more tokens
         require(minEth != 0); // dev: minEth not set
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethBought = getInputPrice(tokensSold, tokenReserve, address(this).balance);
         require(ethBought >= minEth); // dev: tokens not worth enough
         _balances[buyer] = _balances[buyer].sub(tokensSold, "LGT: sell amount exceeds balance");
@@ -405,7 +405,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     ) internal returns (uint256) {
         require(deadline >= now); // dev: deadline passed
         require(ethBought != 0); // dev: must buy more than 0 eth
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 tokensSold = getOutputPrice(ethBought, tokenReserve, address(this).balance);
         require(maxTokens >= tokensSold); // dev: need more tokens to sell
         _balances[buyer] = _balances[buyer].sub(tokensSold, "LGT: sell amount exceeds balance");
@@ -464,7 +464,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @return The amount of tokens that can be bought with `ethSold` ether.
     function getEthToTokenInputPrice(uint256 ethSold) public view returns(uint256) {
         require(ethSold != 0); // dev: no eth to sell
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         return getInputPrice(ethSold, address(this).balance, tokenReserve);
     }
 
@@ -472,7 +472,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @param tokensBought The exact amount of tokens bought
     /// @return The amount of ether needed to buy `tokensBought` tokens
     function getEthToTokenOutputPrice(uint256 tokensBought) public view returns (uint256) {
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         return getOutputPrice(tokensBought, address(this).balance, tokenReserve);
     }
 
@@ -481,7 +481,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @return The amount of ether you receive for selling `tokensSold` tokens.
     function getTokenToEthInputPrice(uint256 tokensSold) public view returns (uint256) {
         require(tokensSold != 0); // dev: can't sell less than one token
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         return getInputPrice(tokensSold, tokenReserve, address(this).balance);
     }
 
@@ -489,7 +489,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @param ethBought The exact amount of ether you are buying.
     /// @return The amount of tokens needed to buy `ethBought` ether.
     function getTokenToEthOutputPrice(uint256 ethBought) public view returns (uint256) {
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned).sub(_ownedSupply);
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         return getOutputPrice(ethBought, tokenReserve, address(this).balance);
     }
 }
