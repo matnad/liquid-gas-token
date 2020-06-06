@@ -53,7 +53,7 @@ contract LiquidGasToken is LiquidERC20 {
         }
     }
 
-    /// @dev calculate the address of a child contract given its salt and hashed bytecode
+    /// @dev calculate the address of a child contract given its salt
     function computeAddress2(uint256 salt) external view returns (address) {
         assembly {
             let data := mload(0x40)
@@ -79,6 +79,8 @@ contract LiquidGasToken is LiquidERC20 {
         }
     }
 
+    /// @dev Destroy `amount` contracts and free the gas.
+    ///      Pass _totalBurned as `i`
     function _destroyContracts(uint256 amount, uint256 i) internal {
         assembly {
             let end := add(i, amount)
@@ -172,7 +174,7 @@ contract LiquidGasToken is LiquidERC20 {
 
         // calculate optimum values for tokens and ether to add
         uint256 totalLiquidity = _poolTotalSupply;
-        // uint256 totalMinted = _totalMinted; //stack too deep
+        // uint256 totalMinted = _totalMinted; //stack too deep, this would save ~800 gas
         tokenAmount = maxTokens;
         ethAmount = msg.value;
         if (totalLiquidity > 0) {
