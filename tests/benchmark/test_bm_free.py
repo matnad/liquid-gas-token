@@ -1,8 +1,18 @@
 import pytest
 from brownie import *
+from brownie.utils import color
 
 
 DEADLINE = 999999999999999
+
+
+def print_benchmark(used, benchmark):
+    if used == benchmark:
+        print(f"[ {color('bright yellow')}BENCHMARK MATCHED {color}]")
+    elif used < benchmark:
+        print(f"[ {color('bright green')}BENCHMARK BEATEN{color} ]")
+    else:
+        print(f"[ {color('bright red')}BENCHMARK MISSED{color} ]")
 
 
 def test_setup(liquid_lgt, accounts):
@@ -25,6 +35,7 @@ def test_burn_and_free_from(liquid_lgt, helper, accounts, params):
     liquid_lgt.mint(params['free'], {'from': accounts[0]})
     tx_free = helper.burnAndFree(params['burn'], params['free'], {'from': accounts[0]})
     gas_paid = tx_free.gas_used
+    print_benchmark(gas_paid, params['gas'])
     print(f"Gas Paid: {gas_paid}/{int(params['burn'])} with {params['free']} owned tokens.")
     assert gas_paid <= params["gas"]
 
@@ -42,6 +53,7 @@ def test_burn_buy_and_free_exact(liquid_lgt, helper, accounts, params):
     price = liquid_lgt.getEthToTokenOutputPrice(params['free'])
     tx_free = helper.burnBuyAndFree(params['burn'], params['free'], {'from': accounts[0], 'value': price})
     gas_paid = tx_free.gas_used
+    print_benchmark(gas_paid, params['gas'])
     print(f"Gas Paid: {gas_paid}/{int(params['burn'])} with {params['free']} bought tokens.")
     assert gas_paid <= params["gas"]
     assert accounts[0].balance() < initial_balance
@@ -59,6 +71,7 @@ def test_burn_buy_up_to_and_free(liquid_lgt, helper, accounts, params):
     initial_balance = accounts[0].balance()
     tx_free = helper.burnBuyUpToAndFree(params['burn'], params['free'], {'from': accounts[0], 'value': "5 ether"})
     gas_paid = tx_free.gas_used
+    print_benchmark(gas_paid, params['gas'])
     print(f"Gas Paid: {gas_paid}/{int(params['burn'])} with (up to) {params['free']} bought tokens.")
     assert gas_paid <= params["gas"]
     assert accounts[0].balance() < initial_balance

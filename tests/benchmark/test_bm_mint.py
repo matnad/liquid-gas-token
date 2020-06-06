@@ -1,8 +1,18 @@
 import pytest
 from brownie import *
-
+from brownie.utils import color
 
 DEADLINE = 999999999999999
+
+
+def print_benchmark(used, benchmark):
+    if used == benchmark:
+        print(f"[ {color('bright yellow')}BENCHMARK MATCHED {color}]")
+    elif used < benchmark:
+        print(f"[ {color('bright green')}BENCHMARK BEATEN{color} ]")
+    else:
+        print(f"[ {color('bright red')}BENCHMARK MISSED{color} ]")
+
 
 def test_setup(liquid_lgt, accounts):
     assert liquid_lgt.totalSupply() == 160
@@ -23,6 +33,7 @@ def test_setup(liquid_lgt, accounts):
 def test_mint(liquid_lgt, accounts, params):
     tx_mint = liquid_lgt.mint(params["amount"], {'from': accounts[0]})
     gas_mint = tx_mint.gas_used
+    print_benchmark(gas_mint, params['gas'])
     print(f"Gas Paid: {gas_mint} for {params['amount']} tokens.")
     assert gas_mint <= params["gas"]
 
@@ -39,6 +50,7 @@ def test_mint_to_sell(liquid_lgt, accounts, params):
     initial_balance = accounts[0].balance()
     tx_mint = liquid_lgt.mintToSell(params["amount"], 1, DEADLINE, {'from': accounts[0]})
     gas_mint = tx_mint.gas_used
+    print_benchmark(gas_mint, params['gas'])
     print(f"Gas Paid: {gas_mint}. Minted {params['amount']} tokens.")
     assert gas_mint <= params["gas"]
     assert accounts[0].balance() > initial_balance
@@ -56,6 +68,7 @@ def test_mint_to_sell_to(liquid_lgt, accounts, params):
     initial_balance = accounts[1].balance()
     tx_mint = liquid_lgt.mintToSellTo(params["amount"], 1, DEADLINE, accounts[1], {'from': accounts[0]})
     gas_mint = tx_mint.gas_used
+    print_benchmark(gas_mint, params['gas'])
     print(f"Gas Paid: {gas_mint}. Minted and sold {params['amount']} tokens.")
     assert gas_mint <= params["gas"]
     assert accounts[1].balance() > initial_balance
@@ -83,6 +96,7 @@ def test_mint_to_liquidity(liquid_lgt, accounts, params):
     assert tokens == params['amount']
     assert eth == params['eth']
     assert shares == params['eth']
+    print_benchmark(gas_mint, params['gas'])
     print(f"Gas Paid: {gas_mint}. Minted and added {params['amount']} tokens and {params['eth']} wei.")
     assert gas_mint <= params["gas"]
     assert liquid_lgt.poolBalanceOf(accounts[1]) > initial_shares
