@@ -178,11 +178,11 @@ contract LiquidGasToken is LiquidERC20 {
         tokenAmount = maxTokens;
         if (totalLiquidity != 0) {
             uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
-            ethAmount = maxTokens.mul(address(this).balance - msg.value).div(tokenReserve).sub(1);
+            ethAmount = (maxTokens.mul(address(this).balance - msg.value) / tokenReserve).sub(1);
             if (ethAmount > msg.value) {
                 // reduce amount of tokens minted to provide maximum possible liquidity
                 tokenAmount = (msg.value + 1).mul(tokenReserve) / (address(this).balance - msg.value);
-                ethAmount = tokenAmount.mul(address(this).balance - msg.value).div(tokenReserve).sub(1);
+                ethAmount = (tokenAmount.mul(address(this).balance - msg.value) / tokenReserve).sub(1);
             }
             liquidityCreated = ethAmount.mul(totalLiquidity) / (address(this).balance - msg.value);
             require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created

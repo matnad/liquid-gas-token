@@ -76,8 +76,8 @@ contract LiquidERC20 is ERC20PointerSupply {
             require(minLiquidity != 0); // dev: no min_liquidity specified
             uint256 ethReserve = address(this).balance - msg.value;
             uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
-            uint256 tokenAmount = msg.value.mul(tokenReserve).div(ethReserve).add(1);
-            uint256 liquidityCreated = msg.value.mul(totalLiquidity).div(ethReserve);
+            uint256 tokenAmount = msg.value.mul(tokenReserve) / ethReserve + 1;
+            uint256 liquidityCreated = msg.value.mul(totalLiquidity) / ethReserve;
             require(maxTokens >= tokenAmount); // dev: need more tokens
             require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
 
@@ -137,8 +137,8 @@ contract LiquidERC20 is ERC20PointerSupply {
         uint256 totalLiquidity = _poolTotalSupply;
         require(totalLiquidity != 0); // dev: no liquidity to remove
         uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
-        uint256 ethAmount = amount.mul(address(this).balance).div(totalLiquidity);
-        uint256 tokenAmount = amount.mul(tokenReserve).div(totalLiquidity);
+        uint256 ethAmount = amount.mul(address(this).balance) / totalLiquidity;
+        uint256 tokenAmount = amount.mul(tokenReserve) / totalLiquidity;
         require(ethAmount >= minEth); // dev: can't remove enough eth
         require(tokenAmount >= minTokens); // dev: can't remove enough tokens
 
@@ -176,7 +176,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         uint256 inputAmountWithFee = inputAmount.mul(995);
         uint256 numerator = inputAmountWithFee.mul(outputReserve);
         uint256 denominator = inputReserve.mul(1000).add(inputAmountWithFee);
-        return numerator.div(denominator);
+        return numerator / denominator;
     }
 
     /// @dev Requirements:
