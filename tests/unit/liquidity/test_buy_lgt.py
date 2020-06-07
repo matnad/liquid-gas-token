@@ -120,6 +120,15 @@ def test_swap_output(liquid_lgt, accounts, tokens_to_buy):
     assert initial_balance - tx.return_value == accounts[2].balance()
 
 
+def test_swap_output_exact(liquid_lgt, accounts):
+    correct_eth_paid = eth_to_token_output(4)
+    expected_eth_paid = liquid_lgt.getEthToTokenOutputPrice(4)
+    assert correct_eth_paid == expected_eth_paid
+    tx = liquid_lgt.ethToTokenSwapOutput(4, DEADLINE, {'from': accounts[2], 'value': expected_eth_paid})
+    assert liquid_lgt.balanceOf(accounts[2]) == 4
+    assert tx.return_value == expected_eth_paid
+
+
 @given(tokens_to_buy=st_amount_token_to_buy)
 @settings(max_examples=5)
 def test_transfer_output(liquid_lgt, accounts, tokens_to_buy):
@@ -161,3 +170,11 @@ def test_output_to_lgt_reverts(liquid_lgt, accounts):
 def test_output_to_zero_reverts(liquid_lgt, accounts):
     with brownie.reverts("dev: can't send to zero address"):
         liquid_lgt.ethToTokenTransferOutput(1, 1, ZERO_ADDRESS, {'from': accounts[2], 'value': "0.2 ether"})
+
+
+def test_fallback(liquid_lgt, accounts):
+    """ Just sending ether to the contract will send tokens back like buying them. """
+    initial_tokens = liquid_lgt.balanceOf(accounts[1])
+    expected_tokens = liquid_lgt.getEthToTokenInputPrice("0.005 ether")
+    accounts[1].transfer(liquid_lgt, "0.005 ether")
+    assert initial_tokens + expected_tokens == liquid_lgt.balanceOf(accounts[1])

@@ -47,3 +47,18 @@ def test_insufficient_payout_reverts(liquid_lgt, accounts):
         eth_bought = liquid_lgt.getTokenToEthInputPrice(10)
         liquid_lgt.mintToSell(10, eth_bought + 1, DEADLINE, {'from': accounts[4]})
 
+
+def test_to_deadline_reverts(liquid_lgt, accounts):
+    with brownie.reverts("dev: deadline passed"):
+        liquid_lgt.mintToSellTo(10, 0, 1, accounts[5], {'from': accounts[4]})
+
+
+def test_to_no_tokens_sell_reverts(liquid_lgt, accounts):
+    with brownie.reverts("dev: must sell one or more tokens"):
+        liquid_lgt.mintToSellTo(0, 0, DEADLINE, accounts[5], {'from': accounts[4]})
+
+
+def test_to_insufficient_payout_reverts(liquid_lgt, accounts):
+    with brownie.reverts("dev: tokens not worth enough"):
+        eth_bought = liquid_lgt.getTokenToEthInputPrice(10)
+        liquid_lgt.mintToSellTo(10, eth_bought + 1, DEADLINE, accounts[5], {'from': accounts[4]})

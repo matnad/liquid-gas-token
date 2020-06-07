@@ -35,6 +35,14 @@ def test_buy_and_free_zero(liquid_lgt, accounts):
     assert initial_balance == accounts[1].balance() + expected_price
 
 
+def test_buy_and_free_exact(liquid_lgt, accounts):
+    initial_supply = liquid_lgt.totalSupply()
+    expected_price = liquid_lgt.getEthToTokenOutputPrice(5)
+    tx = liquid_lgt.buyAndFree(5, DEADLINE, accounts[1], {'from': accounts[1], 'value': expected_price})
+    assert tx.return_value == expected_price
+    assert initial_supply == liquid_lgt.totalSupply() + 5
+
+
 def test_deadline_fails(liquid_lgt, accounts):
     initial_balance = accounts[1].balance()
     initial_token_reserves = liquid_lgt.poolTokenReserves()

@@ -63,3 +63,7 @@ def test_no_eth_reverts(lgt, accounts):
     with brownie.reverts("dev: must provide ether to add liquidity"):
         lgt.mintToLiquidity(10, 0, DEADLINE, accounts[4], {'from': accounts[4]})
 
+
+def test_insufficient_liquidity_reverts(lgt, accounts):
+    with brownie.reverts("dev: not enough liquidity can be created"):
+        lgt.mintToLiquidity(10, "1 ether", DEADLINE, accounts[4], {'from': accounts[4], 'value': "1 ether"})

@@ -126,7 +126,6 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(minEth != 0); // dev: must remove positive eth amount
         require(minTokens != 0); // dev: must remove positive token amount
         uint256 totalLiquidity = _poolTotalSupply;
-        require(totalLiquidity != 0); // dev: no liquidity to remove
         uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         uint256 ethAmount = amount.mul(address(this).balance) / totalLiquidity;
         uint256 tokenAmount = amount.mul(tokenReserve) / totalLiquidity;
@@ -158,12 +157,13 @@ contract LiquidERC20 is ERC20PointerSupply {
     //       Internal price calculation functions for the constant price model with fees.
 
 
+    /// @dev token reserve and pool balance are guaranteed to be non-zero
+    ///      No need to require inputReserve != 0
     function getInputPrice(uint256 inputAmount, uint256 inputReserve, uint256 outputReserve)
         internal
         pure
         returns (uint256)
     {
-        require(inputReserve != 0); // dev: no inputReserve provided
         uint256 inputAmountWithFee = inputAmount.mul(995);
         uint256 numerator = inputAmountWithFee.mul(outputReserve);
         uint256 denominator = inputReserve.mul(1000).add(inputAmountWithFee);
@@ -172,13 +172,13 @@ contract LiquidERC20 is ERC20PointerSupply {
 
     /// @dev Requirements:
     ///      - `OutputAmount` must be greater than `OutputReserve`
+    ///      Token reserve and pool balance are guaranteed to be non-zero
+    ///      No need to require inputReserve != 0 or outputReserve != 0
     function getOutputPrice(uint256 outputAmount, uint256 inputReserve, uint256 outputReserve)
         internal
         pure
         returns (uint256)
     {
-        require(inputReserve != 0); // dev: no inputReserve provided
-        require(outputReserve != 0); // dev: no outputReserve provided
         uint256 numerator = inputReserve.mul(outputAmount).mul(1000);
         uint256 denominator = outputReserve.sub(outputAmount).mul(995);
         return (numerator / denominator).add(1);
