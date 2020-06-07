@@ -84,7 +84,6 @@ contract LiquidGasToken is LiquidERC20 {
     function _destroyContracts(uint256 amount, uint256 i) internal {
         assembly {
             let end := add(i, amount)
-            sstore(_totalBurned_slot, end)
 
             let data := mload(0x40)
             mstore(data,
@@ -108,6 +107,8 @@ contract LiquidGasToken is LiquidERC20 {
                 mstore(ptr, i)
                 pop(call(gas(), keccak256(data, 85), 0, 0, 0, 0, 0))
             }
+
+            sstore(_totalBurned_slot, end)
         }
     }
 
@@ -201,12 +202,12 @@ contract LiquidGasToken is LiquidERC20 {
         _poolTotalSupply = totalLiquidity + liquidityCreated;
         _poolBalances[recipient] += liquidityCreated;
 
+        emit AddLiquidity(recipient, ethAmount, tokenAmount);
+
         // refund excess ether
         if (msg.value > ethAmount) {
             msg.sender.transfer(msg.value - ethAmount);
         }
-
-        emit AddLiquidity(recipient, ethAmount, tokenAmount);
         return (tokenAmount, ethAmount, liquidityCreated);
     }
 
@@ -304,13 +305,13 @@ contract LiquidGasToken is LiquidERC20 {
         if (balance < amount) {
             return false;
         }
-        uint256 allowance = _allowances[owner][msg.sender];
-        if (allowance < amount) {
+        uint256 currentAllowance = _allowances[owner][msg.sender];
+        if (currentAllowance < amount) {
             return false;
         }
         _balances[owner] = balance - amount;
         _ownedSupply = _ownedSupply.sub(amount);
-        _approve(owner, msg.sender, allowance - amount);
+        _approve(owner, msg.sender, currentAllowance - amount);
         _destroyContracts(amount, _totalBurned);
         return true;
     }

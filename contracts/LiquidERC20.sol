@@ -83,21 +83,23 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(minLiquidity != 0); // dev: no min_liquidity specified
 
         uint256 ethReserve = address(this).balance - msg.value;
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 ownedSupply = _ownedSupply;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + ownedSupply);
         uint256 tokenAmount = msg.value.mul(tokenReserve) / ethReserve + 1;
-        uint256 liquidityCreated = msg.value.mul(_poolTotalSupply) / ethReserve;
+        uint256 poolTotalSupply = _poolTotalSupply;
+        uint256 liquidityCreated = msg.value.mul(poolTotalSupply) / ethReserve;
         require(maxTokens >= tokenAmount); // dev: need more tokens
         require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
 
         // create liquidity shares
-        _poolTotalSupply += liquidityCreated;
+        _poolTotalSupply = poolTotalSupply + liquidityCreated;
         _poolBalances[msg.sender] += liquidityCreated;
 
         // remove LGTs from sender
         _balances[msg.sender] = _balances[msg.sender].sub(
             tokenAmount, "LGT: amount exceeds balance"
         );
-        _ownedSupply = _ownedSupply.sub(tokenAmount);
+        _ownedSupply = ownedSupply.sub(tokenAmount);
 
         emit AddLiquidity(msg.sender, msg.value, tokenAmount);
         return liquidityCreated;
@@ -126,7 +128,8 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(minEth != 0); // dev: must remove positive eth amount
         require(minTokens != 0); // dev: must remove positive token amount
         uint256 totalLiquidity = _poolTotalSupply;
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 ownedSupply = _ownedSupply;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + ownedSupply);
         uint256 ethAmount = amount.mul(address(this).balance) / totalLiquidity;
         uint256 tokenAmount = amount.mul(tokenReserve) / totalLiquidity;
         require(ethAmount >= minEth); // dev: can't remove enough eth
@@ -138,18 +141,13 @@ contract LiquidERC20 is ERC20PointerSupply {
 
         // Refund LGTs
         _balances[msg.sender] += tokenAmount;
-        _ownedSupply += tokenAmount;
+        _ownedSupply = ownedSupply + tokenAmount;
+
+        emit RemoveLiquidity(msg.sender, ethAmount, tokenAmount);
 
         // Refund ETH
         msg.sender.transfer(ethAmount);
-
-        emit RemoveLiquidity(msg.sender, ethAmount, tokenAmount);
         return (ethAmount, tokenAmount);
-    }
-
-    function _increaseLiquidity(address owner, uint256 amount) internal {
-        _poolTotalSupply += amount;
-        _poolBalances[owner] += amount;
     }
 
     // ***** Constant Price Model
@@ -200,12 +198,13 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(ethSold != 0); // dev: no eth to sell
         require(minTokens != 0); // dev: must buy one or more tokens
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 ownedSupply = _ownedSupply;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + ownedSupply);
         uint256 ethReserve = address(this).balance.sub(ethSold);
         uint256 tokensBought = getInputPrice(ethSold, ethReserve, tokenReserve);
         require(tokensBought >= minTokens); // dev: not enough eth to buy tokens
         _balances[recipient] += tokensBought;
-        _ownedSupply += tokensBought;
+        _ownedSupply = ownedSupply + tokensBought;
         return tokensBought;
     }
 
@@ -269,12 +268,13 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(tokensBought != 0); // dev: must buy one or more tokens
         require(maxEth != 0); // dev: maxEth must greater than 0
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 ownedSupply = _ownedSupply;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + ownedSupply);
         uint256 ethReserve = address(this).balance.sub(maxEth);
         uint256 ethSold = getOutputPrice(tokensBought, ethReserve, tokenReserve);
         uint256 ethRefund = maxEth.sub(ethSold, "LGT: not enough ETH");
         _balances[recipient] += tokensBought;
-        _ownedSupply += tokensBought;
+        _ownedSupply = ownedSupply + tokensBought;
         if (ethRefund != 0) {
             buyer.transfer(ethRefund);
         }
@@ -336,11 +336,12 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(tokensSold != 0); // dev: must sell one or more tokens
         require(minEth != 0); // dev: minEth not set
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 ownedSupply = _ownedSupply;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + ownedSupply);
         uint256 ethBought = getInputPrice(tokensSold, tokenReserve, address(this).balance);
         require(ethBought >= minEth); // dev: tokens not worth enough
         _balances[buyer] = _balances[buyer].sub(tokensSold, "LGT: amount exceeds balance");
-        _ownedSupply = _ownedSupply.sub(tokensSold);
+        _ownedSupply = ownedSupply.sub(tokensSold);
         recipient.transfer(ethBought);
         return ethBought;
     }
@@ -395,11 +396,12 @@ contract LiquidERC20 is ERC20PointerSupply {
     ) internal returns (uint256) {
         require(deadline >= now); // dev: deadline passed
         require(ethBought != 0); // dev: must buy more than 0 eth
-        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 ownedSupply = _ownedSupply;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + ownedSupply);
         uint256 tokensSold = getOutputPrice(ethBought, tokenReserve, address(this).balance);
         require(maxTokens >= tokensSold); // dev: need more tokens to sell
         _balances[buyer] = _balances[buyer].sub(tokensSold, "LGT: amount exceeds balance");
-        _ownedSupply = _ownedSupply.sub(tokensSold);
+        _ownedSupply = ownedSupply.sub(tokensSold);
         recipient.transfer(ethBought);
         return tokensSold;
     }
