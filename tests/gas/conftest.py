@@ -7,9 +7,9 @@ from brownie import project
 @pytest.fixture(scope="module")
 def liquid_lgt(lgt, accounts):
     lgt.mint(150, {'from': accounts[0]})
-    lgt.addLiquidity(0, 150, 99999999999, {'from': accounts[0], 'value': "1.1 ether"})
+    lgt.addLiquidity(1, 150, 99999999999, {'from': accounts[0], 'value': "0.149 ether"})
     lgt.mint(120, {'from': accounts[1]})
-    lgt.addLiquidity("0.5 ether", 100, 99999999999, {'from': accounts[1], 'value': "0.5 ether"})
+    lgt.addLiquidity(1, 100, 99999999999, {'from': accounts[1], 'value': "0.099 ether"})
     yield lgt
 
 
