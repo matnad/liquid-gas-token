@@ -5,10 +5,17 @@ This is done with integration tests.
 
 
 def test_free(lgt, accounts):
-    assert lgt.totalSupply() == 31
+    assert lgt.balanceOf(accounts[0]) == 30
     tx = lgt.free(10, {'from': accounts[0]})
     assert tx.return_value
     assert lgt.balanceOf(accounts[0]) == 20
+
+
+def test_free_zero(lgt, accounts):
+    assert lgt.balanceOf(accounts[0]) == 30
+    tx = lgt.free(0, {'from': accounts[0]})
+    assert tx.return_value
+    assert lgt.balanceOf(accounts[0]) == 30
 
 
 def test_free_from(lgt, accounts):
@@ -20,6 +27,17 @@ def test_free_from(lgt, accounts):
     assert tx.return_value
     assert lgt.balanceOf(owner) == 20
     assert lgt.allowance(owner, spender) == 1
+
+
+def test_free_from_zero(lgt, accounts):
+    owner, spender = accounts[:2]
+    assert lgt.balanceOf(owner) == 30
+    lgt.approve(spender, 11, {'from': owner})
+    assert lgt.allowance(owner, spender) == 11
+    tx = lgt.freeFrom(0, owner, {'from': spender})
+    assert tx.return_value
+    assert lgt.balanceOf(owner) == 30
+    assert lgt.allowance(owner, spender) == 11
 
 
 def test_no_spender_balance_fails(lgt, accounts):

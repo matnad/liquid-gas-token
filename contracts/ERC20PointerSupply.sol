@@ -158,7 +158,6 @@ contract ERC20PointerSupply is IERC20 {
     }
 
     function _approve(address owner, address spender, uint256 amount) internal virtual {
-
         _allowances[owner][spender] = amount;
         emit Approval(owner, spender, amount);
     }

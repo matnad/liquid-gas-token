@@ -285,9 +285,6 @@ contract LiquidGasToken is LiquidERC20 {
     /// @param amount The amount of tokens to free
     /// @return True if `tokenAmount` tokens could be freed, False otherwise.
     function free(uint256 amount) external returns (bool) {
-        if (amount == 0) {
-            return false;
-        }
         uint256 balance = _balances[msg.sender];
         if (balance < amount) {
             return false;
@@ -303,9 +300,6 @@ contract LiquidGasToken is LiquidERC20 {
     /// @param owner The `owner` of the tokens. The `sender` must have an allowance.
     /// @return True if `tokenAmount` tokens could be freed, False otherwise.
     function freeFrom(uint256 amount, address owner) external returns (bool) {
-        if (amount == 0) {
-            return false;
-        }
         uint256 balance = _balances[owner];
         if (balance < amount) {
             return false;
@@ -339,17 +333,20 @@ contract LiquidGasToken is LiquidERC20 {
         payable
         returns (uint256)
     {
-        if (amount == 0 || deadline <= now) {
+        if (deadline < now) {
+            refundTo.transfer(msg.value);
             return 0;
         }
         uint256 totalBurned = _totalBurned;
         uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
         if (tokenReserve < amount) {
+            refundTo.transfer(msg.value);
             return 0;
         }
         uint256 ethReserve = address(this).balance - msg.value;
         uint256 ethSold = getOutputPrice(amount, ethReserve, tokenReserve);
         if (msg.value < ethSold) {
+            refundTo.transfer(msg.value);
             return 0;
         }
         uint256 ethRefund = msg.value - ethSold;
@@ -366,16 +363,14 @@ contract LiquidGasToken is LiquidERC20 {
     /// @param maxTokens The maximum amount of tokens to buy and free with the sent ether.
     /// @param deadline The time after which the transaction can no longer be executed.
     ///        Will revert if the current timestamp is after the deadline.
-    /// @dev This will not revert unless an unexpected error occurs. Instead it will return 0.
+    /// @dev Will revert if deadline passed to refund the ether.
     /// @return The amount of tokens bought and freed.
     function buyUpToAndFree(uint256 maxTokens, uint256 deadline)
         public
         payable
         returns (uint256)
     {
-        if (maxTokens == 0 || deadline <= now) {
-            return 0;
-        }
+        require(deadline >= now); // dev: deadline passed
         uint256 ethReserve = address(this).balance - msg.value;
         uint256 totalBurned = _totalBurned;
         uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
