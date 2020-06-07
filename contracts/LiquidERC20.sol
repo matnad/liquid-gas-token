@@ -118,7 +118,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///      - `sender` must have a liquidity pool balance of at least `amount`.
     /// @return The amount of ether and tokens refunded.
     function removeLiquidity(uint256 amount, uint256 minEth, uint256 minTokens, uint256 deadline)
-        public
+        external
         returns (uint256, uint256)
     {
         require(deadline >= now); // dev: deadline passed
@@ -192,7 +192,6 @@ contract LiquidERC20 is ERC20PointerSupply {
         uint256 ethSold,
         uint256 minTokens,
         uint256 deadline,
-        address buyer,
         address recipient
     )
         internal
@@ -213,7 +212,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @notice Convert ETH to Tokens
     /// @dev User cannot specify minimum output or deadline.
     receive() external payable {
-        ethToTokenInput(msg.value, 1, now, msg.sender, msg.sender);
+        ethToTokenInput(msg.value, 1, now, msg.sender);
     }
 
     /// @notice Convert ether to tokens. Specify the exact input (in ether) and
@@ -226,11 +225,11 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @dev Excess ether for buying a partial token is not refunded.
     /// @return The amount of tokens bought.
     function ethToTokenSwapInput(uint256 minTokens, uint256 deadline)
-        public
+        external
         payable
         returns (uint256)
     {
-        return ethToTokenInput(msg.value, minTokens, deadline, msg.sender, msg.sender);
+        return ethToTokenInput(msg.value, minTokens, deadline, msg.sender);
     }
 
     /// @notice Convert ether to tokens and transfer tokens to `recipient`.
@@ -246,13 +245,13 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///      - `recipient` can't be this contract or the zero address
     /// @return The amount of tokens bought and transferred to `recipient`.
     function ethToTokenTransferInput(uint256 minTokens, uint256 deadline, address recipient)
-        public
+        external
         payable
         returns (uint256)
     {
         require(recipient != address(this)); // dev: can't send to liquid token contract
         require(recipient != address(0)); // dev: can't send to zero address
-        return ethToTokenInput(msg.value, minTokens, deadline, msg.sender, recipient);
+        return ethToTokenInput(msg.value, minTokens, deadline, recipient);
     }
 
 
@@ -292,7 +291,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @dev Excess ether after buying `tokensBought` tokens is refunded.
     /// @return The amount of ether sold to buy `tokensBought` tokens.
     function ethToTokenSwapOutput(uint256 tokensBought, uint256 deadline)
-        public
+        external
         payable
         returns (uint256)
     {
@@ -313,7 +312,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///      - `recipient` can't be this contract or the zero address
     /// @return The amount of ether sold to buy `tokensBought` tokens.
     function ethToTokenTransferOutput(uint256 tokensBought, uint256 deadline, address recipient)
-        public
+        external
         payable
         returns (uint256)
     {
@@ -356,7 +355,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///        Will revert if the current timestamp is after the deadline.
     /// @return The amount of ether bought.
     function tokenToEthSwapInput(uint256 tokensSold, uint256 minEth, uint256 deadline)
-        public
+        external
         returns (uint256)
     {
         return tokenToEthInput(tokensSold, minEth, deadline, msg.sender, msg.sender);
@@ -379,7 +378,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         uint256 minEth,
         uint256 deadline,
         address payable recipient
-    ) public returns (uint256) {
+    ) external returns (uint256) {
         require(recipient != address(this)); // dev: can't send to liquid token contract
         require(recipient != address(0)); // dev: can't send to zero address
         return tokenToEthInput(tokensSold, minEth, deadline, msg.sender, recipient);
@@ -415,7 +414,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///        Will revert if the current timestamp is after the deadline.
     /// @return The amount of tokens sold.
     function tokenToEthSwapOutput(uint256 ethBought, uint256 maxTokens, uint256 deadline)
-        public
+        external
         returns (uint256)
     {
         return tokenToEthOutput(ethBought, maxTokens, deadline, msg.sender, msg.sender);
@@ -439,7 +438,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         uint256 deadline,
         address payable recipient
     )
-        public
+        external
         returns (uint256)
     {
         require(recipient != address(this)); // dev: can't send to liquid token contract

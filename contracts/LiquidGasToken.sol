@@ -127,7 +127,7 @@ contract LiquidGasToken is LiquidERC20 {
 
     /// @notice Mint personally owned Liquid Gas Tokens
     /// @param amount The amount of tokens to mint
-    function mint(uint256 amount) public {
+    function mint(uint256 amount) external {
         _createContracts(amount, _totalMinted);
         _balances[msg.sender] += amount;
         _ownedSupply += amount;
@@ -136,7 +136,7 @@ contract LiquidGasToken is LiquidERC20 {
     /// @notice Mint Liquid Gas Tokens for `recipient`
     /// @param amount The amount of tokens to mint
     /// @param recipient The owner of the minted Liquid Gas Tokens
-    function mintFor(uint256 amount, address recipient) public {
+    function mintFor(uint256 amount, address recipient) external {
         _createContracts(amount, _totalMinted);
         _balances[recipient] += amount;
         _ownedSupply += amount;
@@ -366,7 +366,7 @@ contract LiquidGasToken is LiquidERC20 {
     /// @dev Will revert if deadline passed to refund the ether.
     /// @return The amount of tokens bought and freed.
     function buyUpToAndFree(uint256 maxTokens, uint256 deadline)
-        public
+        external
         payable
         returns (uint256)
     {

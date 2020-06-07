@@ -27,7 +27,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @dev This is different from a classic ERC20 implementation as the supply is calculated
     ///      from the burned and minted tokens instead of stored in its own variable.
     /// @return Total number of tokens in circulation.
-    function totalSupply() public view override returns (uint256) {
+    function totalSupply() external view override returns (uint256) {
         return _totalMinted.sub(_totalBurned);
     }
 
@@ -37,14 +37,14 @@ contract ERC20PointerSupply is IERC20 {
     ///      but it makes operations on unowned tokens much cheaper.
     ///      TotalSupply() = ownedSupply() + unownedSupply().
     /// @return Total number of tokens owned by specific addresses.
-    function ownedSupply() public view returns (uint256) {
+    function ownedSupply() external view returns (uint256) {
         return _ownedSupply;
     }
 
     /// @notice Returns the amount of tokens owned by `account`.
     /// @param account The account to query for the balance.
     /// @return The amount of tokens owned by `account`.
-    function balanceOf(address account) public view override returns (uint256) {
+    function balanceOf(address account) external view override returns (uint256) {
         return _balances[account];
     }
 
@@ -56,7 +56,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param recipient The tokens are transferred to this address.
     /// @param amount The amount of tokens to be transferred.
     /// @return True if the transfer succeeded, False otherwise.
-    function transfer(address recipient, uint256 amount) public override returns (bool) {
+    function transfer(address recipient, uint256 amount) external override returns (bool) {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
@@ -68,7 +68,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by `owner`.
     /// @return Remaining number of tokens that `spender` will be
     ///         allowed to spend on behalf of `owner`
-    function allowance(address owner, address spender) public view override returns (uint256) {
+    function allowance(address owner, address spender) external view override returns (uint256) {
         return _allowances[owner][spender];
     }
 
@@ -85,7 +85,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by the caller.
     /// @param amount The amount of tokens the `spender` can spend from the caller's supply.
     /// @return True if the approval succeeded, False otherwise.
-    function approve(address spender, uint256 amount) public override returns (bool) {
+    function approve(address spender, uint256 amount) external override returns (bool) {
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -102,7 +102,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param recipient The tokens are transferred to this address.
     /// @param amount The amount of tokens to be transferred.
     /// @return True if the transfer succeeded, False otherwise.
-    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) external override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(
             sender,
@@ -121,7 +121,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by the caller.
     /// @param addedValue The amount of tokens to add to the current `allowance`.
     /// @return True if the approval succeeded, False otherwise.
-    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
         _approve(msg.sender, spender, _allowances[msg.sender][spender].add(addedValue));
         return true;
     }
@@ -136,7 +136,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by the caller.
     /// @param subtractedValue The amount of tokens to subtract from the current `allowance`.
     /// @return True if the approval succeeded, False otherwise.
-    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
         _approve(
             msg.sender,
             spender,
