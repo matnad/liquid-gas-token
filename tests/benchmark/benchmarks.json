@@ -25,44 +25,44 @@
     {
       "burn": 100000.0,
       "free": 4,
-      "gas": 81291
+      "gas": 81274
     },
     {
       "burn": 500000.0,
       "free": 12,
-      "gas": 321408
+      "gas": 321374
     },
     {
       "burn": 1000000.0,
       "free": 25,
-      "gas": 592770
+      "gas": 592753
     },
     {
       "burn": 2000000.0,
       "free": 50,
-      "gas": 1165958
+      "gas": 1165941
     }
   ],
   "test_burn_buy_up_to_and_free": [
     {
       "burn": 100000.0,
       "free": 4,
-      "gas": 81168
+      "gas": 81159
     },
     {
       "burn": 500000.0,
       "free": 12,
-      "gas": 321161
+      "gas": 321144
     },
     {
       "burn": 1000000.0,
       "free": 25,
-      "gas": 592647
+      "gas": 592638
     },
     {
       "burn": 2000000.0,
       "free": 50,
-      "gas": 1165834
+      "gas": 1165826
     }
   ],
   "test_mint": [
@@ -86,37 +86,37 @@
   "test_mint_to_sell": [
     {
       "amount": 1,
-      "gas": 74295
+      "gas": 74278
     },
     {
       "amount": 10,
-      "gas": 402696
+      "gas": 402679
     },
     {
       "amount": 32,
-      "gas": 1204063
+      "gas": 1204046
     },
     {
       "amount": 71,
-      "gas": 2625743
+      "gas": 2625726
     }
   ],
   "test_mint_to_sell_to": [
     {
       "amount": 1,
-      "gas": 74693
+      "gas": 74676
     },
     {
       "amount": 10,
-      "gas": 403094
+      "gas": 403077
     },
     {
       "amount": 32,
-      "gas": 1204461
+      "gas": 1204444
     },
     {
       "amount": 71,
-      "gas": 2626141
+      "gas": 2626124
     }
   ],
   "test_mint_to_liquidity": [
