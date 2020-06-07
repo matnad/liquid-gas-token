@@ -111,6 +111,13 @@ contract LiquidGasToken is LiquidERC20 {
         }
     }
 
+    // *** Constructor
+
+    // @dev: Set initial liquidity. Must mint at least 1 token to the pool.
+    constructor() public {
+        _createContracts(1, 0);
+    }
+
     // ***** Gas Token Minting
     //       -----------------
     //       Different ways to mint Gas Tokens

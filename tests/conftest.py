@@ -18,6 +18,7 @@ def lgt(LiquidGasToken, accounts):
         lgt_deployer = accounts.load("gst_deployer")
     assert lgt_deployer.nonce == 0
     accounts[9].transfer(lgt_deployer, "20 ether")
+    accounts[9].transfer("0x00000000007475142d6329FC42Dc9684c9bE6cD0", "0.001 ether")
     nonce = 69
     lgt = None
     for i in range(nonce + 1):

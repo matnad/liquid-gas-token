@@ -1,6 +1,5 @@
 # automatically fetch contract sources from Etherscan
 autofetch_sources: true
-dev_deployment_artifacts: true
 
 compiler:
     solc:

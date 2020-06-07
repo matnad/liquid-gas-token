@@ -36,7 +36,7 @@ def test_decrease_approval(lgt, accounts):
 
 def test_decrease_approval_reverts(lgt, accounts):
     lgt.approve(accounts[1], 50, {'from': accounts[0]})
-    with brownie.reverts("ERC20: decreased allowance below zero"):
+    with brownie.reverts("ERC20: allowance below zero"):
         lgt.decreaseAllowance(accounts[1], 60, {'from': accounts[0]})
     assert lgt.allowance(accounts[0], accounts[1]) == 50
 
@@ -55,5 +55,5 @@ def test_transfer_from(lgt, accounts):
 @pytest.mark.parametrize('idx', [0, 1, 2])
 def test_transfer_from_reverts(lgt, accounts, idx):
     """transerFrom should revert"""
-    with brownie.reverts("ERC20: transfer amount exceeds allowance"):
+    with brownie.reverts("ERC20: exceeds allowance"):
         lgt.transferFrom(accounts[0], accounts[2], 20, {'from': accounts[idx]})

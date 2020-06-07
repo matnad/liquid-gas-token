@@ -5,11 +5,10 @@ This is done with integration tests.
 
 
 def test_free(lgt, accounts):
-    assert lgt.totalSupply() == 30
+    assert lgt.totalSupply() == 31
     tx = lgt.free(10, {'from': accounts[0]})
     assert tx.return_value
     assert lgt.balanceOf(accounts[0]) == 20
-    assert lgt.totalSupply() == 20
 
 
 def test_free_from(lgt, accounts):
@@ -20,7 +19,6 @@ def test_free_from(lgt, accounts):
     tx = lgt.freeFrom(10, owner, {'from': spender})
     assert tx.return_value
     assert lgt.balanceOf(owner) == 20
-    assert lgt.totalSupply() == 20
     assert lgt.allowance(owner, spender) == 1
 
 

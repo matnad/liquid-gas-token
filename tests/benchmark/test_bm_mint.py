@@ -49,11 +49,11 @@ def save_benchmark_to_file(function, obj, new_benchmark):
 
 
 def test_setup(liquid_lgt, accounts):
-    assert liquid_lgt.totalSupply() == 160
-    assert liquid_lgt.ownedSupply() == 68
+    assert liquid_lgt.totalSupply() == 161
+    assert liquid_lgt.ownedSupply() == 60
     assert liquid_lgt.balanceOf(accounts[0]) == 30
-    assert liquid_lgt.balanceOf(accounts[1]) == 38
-    assert liquid_lgt.poolTokenReserves() == 92
+    assert liquid_lgt.balanceOf(accounts[1]) == 30
+    assert liquid_lgt.poolTokenReserves() == 101
 
 
 @pytest.mark.parametrize("params", PARAMS['test_mint'])

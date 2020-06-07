@@ -50,6 +50,16 @@ contract LiquidERC20 is ERC20PointerSupply {
         return _totalMinted.sub(_totalBurned + _ownedSupply);
     }
 
+    // *** Constructor
+    /// @dev start with initial liquidity. Contract must be pre-funded.
+    constructor() public {
+        // Implementation must mint at least 1 token to the pool during deployment.
+        uint ethReserve = address(this).balance;
+        require(ethReserve > 1000000000);
+        _poolTotalSupply += ethReserve;
+        _poolBalances[msg.sender] += ethReserve;
+    }
+
     /// @notice Add liquidity to the pool and receive liquidity shares. Must deposit
     ///         an equal amount of ether and tokens at the current exchange rate.
     ///         Emits an {AddLiquidity} event.

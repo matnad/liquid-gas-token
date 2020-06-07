@@ -13,4 +13,4 @@ def test_mint_lgt(lgt, accounts):
     lgt.mint(2, {'from': accounts[2]})
     assert lgt.balanceOf(accounts[1]) == 1
     assert lgt.balanceOf(accounts[2]) == 2
-    assert lgt.totalSupply() == 33
+    assert lgt.totalSupply() == 34
