@@ -40,6 +40,9 @@ jobs:
     - name: Install Requirements
       run: pip install -r requirements.txt
 
+    - name: Install dependencies
+      run: brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.1
+
     - name: Run Unit Tests
       run: brownie test tests/unit/ -w -n 8
 
@@ -71,6 +74,9 @@ jobs:
 
       - name: Install Requirements
         run: pip install -r requirements.txt
+
+      - name: Install dependencies
+        run: brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.1
 
       - name: Run Benchmarks
         run: brownie test tests/benchmark/ -s -w --network mainnet-fork
