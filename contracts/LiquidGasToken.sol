@@ -180,30 +180,25 @@ contract LiquidGasToken is LiquidERC20 {
         require(msg.value != 0); // dev: must provide ether to add liquidity
 
         // calculate optimum values for tokens and ether to add
-        uint256 totalLiquidity = _poolTotalSupply;
         uint256 totalMinted = _totalMinted;
         tokenAmount = maxTokens;
-        if (totalLiquidity != 0) {
-            uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
-            ethAmount = (maxTokens.mul(address(this).balance - msg.value) / tokenReserve).sub(1);
-            if (ethAmount > msg.value) {
-                // reduce amount of tokens minted to provide maximum possible liquidity
-                tokenAmount = (msg.value + 1).mul(tokenReserve) / (address(this).balance - msg.value);
-                ethAmount = (tokenAmount.mul(address(this).balance - msg.value) / tokenReserve).sub(1);
-            }
-            liquidityCreated = ethAmount.mul(totalLiquidity) / (address(this).balance - msg.value);
-            require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
-        } else {
-            require(msg.value > 1000000000); // dev: initial eth below 1 gwei
-            liquidityCreated = address(this).balance;
-            ethAmount = msg.value;
+        uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
+        uint ethReserve = address(this).balance - msg.value;
+        ethAmount = (maxTokens.mul(ethReserve) / tokenReserve).sub(1);
+        if (ethAmount > msg.value) {
+            // reduce amount of tokens minted to provide maximum possible liquidity
+            tokenAmount = (msg.value + 1).mul(tokenReserve) / ethReserve;
+            ethAmount = (tokenAmount.mul(ethReserve) / tokenReserve).sub(1);
         }
+        uint256 totalLiquidity = _poolTotalSupply;
+        liquidityCreated = ethAmount.mul(totalLiquidity) / ethReserve;
+        require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
 
         // Mint tokens directly to the liquidity pool
         _createContracts(tokenAmount, totalMinted);
 
         // Create liquidity shares for recipient
-        _poolTotalSupply += liquidityCreated;
+        _poolTotalSupply = totalLiquidity + liquidityCreated;
         _poolBalances[recipient] += liquidityCreated;
 
         // refund excess ether

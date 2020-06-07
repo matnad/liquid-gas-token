@@ -80,46 +80,27 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(deadline >= now); // dev: deadline passed
         require(maxTokens != 0); // dev: no tokens to add
         require(msg.value != 0); // dev: no ether to add
-        uint256 totalLiquidity = _poolTotalSupply;
+        require(minLiquidity != 0); // dev: no min_liquidity specified
 
-        if (totalLiquidity != 0) {
-            require(minLiquidity != 0); // dev: no min_liquidity specified
-            uint256 ethReserve = address(this).balance - msg.value;
-            uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
-            uint256 tokenAmount = msg.value.mul(tokenReserve) / ethReserve + 1;
-            uint256 liquidityCreated = msg.value.mul(totalLiquidity) / ethReserve;
-            require(maxTokens >= tokenAmount); // dev: need more tokens
-            require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
+        uint256 ethReserve = address(this).balance - msg.value;
+        uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
+        uint256 tokenAmount = msg.value.mul(tokenReserve) / ethReserve + 1;
+        uint256 liquidityCreated = msg.value.mul(_poolTotalSupply) / ethReserve;
+        require(maxTokens >= tokenAmount); // dev: need more tokens
+        require(liquidityCreated >= minLiquidity); // dev: not enough liquidity can be created
 
-            // create liquidity shares
-            _poolTotalSupply += liquidityCreated;
-            _poolBalances[msg.sender] += liquidityCreated;
+        // create liquidity shares
+        _poolTotalSupply += liquidityCreated;
+        _poolBalances[msg.sender] += liquidityCreated;
 
-            // remove LGTs from sender
-            _balances[msg.sender] = _balances[msg.sender].sub(
-                tokenAmount, "LGT: amount exceeds balance"
-            );
-            _ownedSupply = _ownedSupply.sub(tokenAmount);
+        // remove LGTs from sender
+        _balances[msg.sender] = _balances[msg.sender].sub(
+            tokenAmount, "LGT: amount exceeds balance"
+        );
+        _ownedSupply = _ownedSupply.sub(tokenAmount);
 
-            emit AddLiquidity(msg.sender, msg.value, tokenAmount);
-            return liquidityCreated;
-        } else {
-            require(msg.value > 1000000000); // dev: initial eth below 1 gwei
-            uint256 initialLiquidity = address(this).balance;
-
-            // create liquidity shares
-            _poolTotalSupply += initialLiquidity;
-            _poolBalances[msg.sender] += initialLiquidity;
-
-            // remove LGTs from sender
-            _balances[msg.sender] = _balances[msg.sender].sub(
-                maxTokens, "LGT: amount exceeds balance"
-            );
-            _ownedSupply = _ownedSupply.sub(maxTokens);
-
-            emit AddLiquidity(msg.sender, msg.value, maxTokens);
-            return initialLiquidity;
-        }
+        emit AddLiquidity(msg.sender, msg.value, tokenAmount);
+        return liquidityCreated;
     }
 
 
