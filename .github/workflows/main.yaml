@@ -9,7 +9,6 @@ name: main workflow
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  LGT_DEPLOYER: ${{ secrets.LGT_DEPLOYER }}
   WEB3_INFURA_PROJECT_ID: 0888c9df49d74a52b6c400eeeda9debf
 
 jobs:
@@ -46,9 +45,6 @@ jobs:
     - name: Run Unit Tests
       run: brownie test tests/unit/ -w -n auto
 
-    - name: Run Gas Tests
-      run: brownie test tests/gas/ -s -w --network mainnet-fork
-
   Benchmarks:
     runs-on: ubuntu-latest
 
@@ -78,5 +74,8 @@ jobs:
       - name: Install Dependencies
         run: brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.1
 
-      - name: Run Benchmarks
-        run: brownie run benchmarks/main --network mainnet-fork
+      - name: Run Internal Benchmarks
+        run: brownie run benchmarks/gas_benchmarks --network mainnet-fork
+
+      - name: Run Comparative Benchmarks
+          run: brownie run benchmarks/gas_token_comparison --network mainnet-fork

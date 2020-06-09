@@ -8,13 +8,15 @@ def main():
     Deploys, funds and approves GST2, CHI and LGT.
     Must be run on mainnet fork.
     """
-
+    rpc.reset()
     # Deploy and fund LGT
-    lgt = deploy_lgt()
-    lgt.mint(180, {'from': accounts[0]})
-    lgt.addLiquidity(0, 150, 99999999999, {'from': accounts[0], 'value': "1.1 ether"})
-    lgt.mint(120, {'from': accounts[1]})
-    lgt.addLiquidity("0.5 ether", 100, 99999999999, {'from': accounts[1], 'value': "0.5 ether"})
+    lgt_deployer = accounts.add("0x7d4cbcfd42fe584226a17f385f734b046090f3e9d9fd95b2e10ef53acbbc39e2")
+    accounts[9].transfer("0x000000000049091f98692b2460500b6d133ae31f", "0.001 ether")
+    lgt = lgt_deployer.deploy(LiquidGasToken)
+    lgt.mint(80, {'from': accounts[0]})
+    lgt.addLiquidity(1, 50, 999999999999999, {'from': accounts[0], 'value': "0.049 ether"})
+    lgt.mint(70, {'from': accounts[1]})
+    lgt.addLiquidity(1, 50, 999999999999999, {'from': accounts[1], 'value': "0.049 ether"})
     lgt.mint(50, {'from': accounts[2]})
 
     # Load GST2
