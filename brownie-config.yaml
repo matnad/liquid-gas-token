@@ -9,3 +9,7 @@ compiler:
 
 dependencies:
   - OpenZeppelin/openzeppelin-contracts@3.0.1
+
+reports:
+    exclude_contracts:
+        - SafeMath

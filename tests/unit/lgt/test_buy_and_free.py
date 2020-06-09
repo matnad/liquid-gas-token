@@ -46,7 +46,7 @@ def test_buy_and_free_exact(liquid_lgt, accounts):
 def test_buy_and_free_opt(liquid_lgt, accounts):
     initial_supply = liquid_lgt.totalSupply()
     expected_price = liquid_lgt.getEthToTokenOutputPrice(1)
-    liquid_lgt.buyAndFree71397416(1, {'from': accounts[1], 'value': expected_price})
+    liquid_lgt.buyAndFree22457070633(1, {'from': accounts[1], 'value': expected_price})
     assert initial_supply == liquid_lgt.totalSupply() + 1
 
 
