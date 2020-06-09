@@ -7,7 +7,11 @@ import "../interfaces/ICHI.sol";
 contract LgtHelper {
     uint256 public c = 1;
 
-    function burnGas(uint256 burn) public returns (uint256 burned){
+    ILGT public constant lgt = ILGT(0x00000000007475142d6329FC42Dc9684c9bE6cD0);
+    ICHI public constant chi = ICHI(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
+    IGST public constant gst = IGST(0x0000000000b3F879cb30FE243b4Dfee438691c04);
+
+    function burnGas(uint256 burn) public returns (uint256 burned) {
         uint256 start = gasleft();
         assert(start > burn + 200);
         uint256 end = start - burn;
@@ -20,31 +24,35 @@ contract LgtHelper {
 
     function burnAndFree(uint256 burn, uint256 tokenAmount) public returns (bool success) {
         burnGas(burn);
-        return ILGT(0x00000000007475142d6329FC42Dc9684c9bE6cD0).freeFrom(tokenAmount, msg.sender);
-    }
-
-    function freeAndBurn(uint256 burn, uint256 tokenAmount) public returns (bool success) {
-        success =  ILGT(0x00000000007475142d6329FC42Dc9684c9bE6cD0).freeFrom(tokenAmount, msg.sender);
-        burnGas(burn);
+        return lgt.freeFrom(tokenAmount, msg.sender);
     }
 
     function burnAndFreeGST(uint256 burn, uint256 tokenAmount) public returns (bool success) {
         burnGas(burn);
-        return IGST(0x0000000000b3F879cb30FE243b4Dfee438691c04).freeFrom(msg.sender, tokenAmount);
+        return gst.freeFrom(msg.sender, tokenAmount);
     }
 
     function burnAndFreeCHI(uint256 burn, uint256 tokenAmount) public returns (uint256) {
         burnGas(burn);
-        return ICHI(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c).freeFrom(msg.sender, tokenAmount);
+        return chi.freeFrom(msg.sender, tokenAmount);
     }
 
-    function burnBuyAndFree(uint256 burn, uint256 tokenAmount) public payable returns (uint256 ethSold) {
+    function burnBuyAndFree(uint256 burn, uint256 tokenAmount)
+        public payable returns (uint256 ethSold)
+    {
         burnGas(burn);
-        return ILGT(0x00000000007475142d6329FC42Dc9684c9bE6cD0).buyAndFree{value: msg.value}(tokenAmount, now + 1, msg.sender);
+        return lgt.buyAndFree{value: msg.value}(tokenAmount, now, msg.sender);
     }
 
-    function burnBuyUpToAndFree(uint256 burn, uint256 tokenAmount) public payable returns (uint256 ethSold) {
+    function burnBuyAndFreeOpt(uint256 burn, uint256 tokenAmount) public payable {
         burnGas(burn);
-        return ILGT(0x00000000007475142d6329FC42Dc9684c9bE6cD0).buyUpToAndFree{value: msg.value}(tokenAmount, now + 1);
+        lgt.buyAndFree22457070633{value: msg.value}(tokenAmount);
+    }
+
+    function burnBuyUpToAndFree(uint256 burn, uint256 tokenAmount)
+        public payable returns (uint256 ethSold)
+    {
+        burnGas(burn);
+        return lgt.buyUpToAndFree{value: msg.value}(tokenAmount, now);
     }
 }
