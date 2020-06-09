@@ -30,7 +30,7 @@ Comparative benchmarks for GST2, CHI and LGT. For GST2 and CHI, uniswap is used 
 
 This does not give a full representation of gas cost, just a snapshot with the used token amounts. Care has been taken that all variables are initialized and the comparison is as fair as possible.
 
-Benchmarks were calculated using a [Brownie](https://github.com/eth-brownie/brownie) script on a [Ganache](https://github.com/trufflesuite/ganache-cli) forked main net wit. You can see the script and details [here](scripts/benchmarks/gas_token_comparison.py).
+Benchmarks were calculated using a [Brownie](https://github.com/eth-brownie/brownie) script on a [Ganache](https://github.com/trufflesuite/ganache-cli) forked main net. You can see the script and details [here](scripts/benchmarks/gas_token_comparison.py).
 
 ### Minting 4 tokens
 ```
