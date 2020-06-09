@@ -62,7 +62,8 @@ The contract will be deployed on the test and main nets soon.
 
 To run tests or scripts, clone the repo and use 
 
-    brownie test -C -n auto
+    brownie test tests/unit/ -C -n auto
+    brownie test tests/integration/ -n auto --network mainnet-fork
     
 or  
     
