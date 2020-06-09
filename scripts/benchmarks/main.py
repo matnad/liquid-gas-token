@@ -94,6 +94,7 @@ def main(update_benchmarks: str = "never"):
         with BENCHMARK_FILE.open("w") as fp:
             json.dump(results, fp, sort_keys=True, indent=2, default=sorted)
 
+    network.disconnect()
     # Raise if benchmarks missed
     if total_improvement < 0:
         raise MissedBenchmark(f"Benchmark missed by {total_improvement}")
