@@ -1,3 +1,4 @@
+// SPDX-License-Identifier: MIT
 pragma solidity ^0.6.7;
 
 import "./ERC20PointerSupply.sol";
