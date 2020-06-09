@@ -1,0 +1,120 @@
+{
+  "free": {
+    "buyAndFree": {
+      "args": [
+        999999999999999,
+        "account"
+      ],
+      "gas_used": [
+        18336,
+        59321,
+        109089,
+        223261
+      ],
+      "value": "getEthToTokenOutputPrice"
+    },
+    "buyAndFree22457070633": {
+      "args": [],
+      "gas_used": [
+        17926,
+        58911,
+        108679,
+        222851
+      ],
+      "value": "getEthToTokenOutputPrice"
+    },
+    "buyUpToAndFree": {
+      "args": [
+        999999999999999
+      ],
+      "gas_used": [
+        18056,
+        59041,
+        108808,
+        222981
+      ],
+      "value": "getEthToTokenOutputPrice"
+    },
+    "free": {
+      "args": [],
+      "gas_used": [
+        22687,
+        63672,
+        22440,
+        22440
+      ]
+    },
+    "freeFrom": {
+      "args": [
+        "account"
+      ],
+      "gas_used": [
+        23816,
+        23816,
+        22839,
+        22839
+      ]
+    }
+  },
+  "mint": {
+    "mint": {
+      "args": [],
+      "gas_used": [
+        75578,
+        586424,
+        1205346,
+        2627026
+      ]
+    },
+    "mintFor": {
+      "args": [
+        "account"
+      ],
+      "gas_used": [
+        75992,
+        586838,
+        1205760,
+        2627440
+      ]
+    },
+    "mintToLiquidity": {
+      "args": [
+        1,
+        999999999999999,
+        "account"
+      ],
+      "gas_used": [
+        88337,
+        599183,
+        1218105,
+        2639785
+      ],
+      "value": "2 ether"
+    },
+    "mintToSell": {
+      "args": [
+        1,
+        999999999999999
+      ],
+      "gas_used": [
+        74366,
+        585212,
+        1204134,
+        2625814
+      ]
+    },
+    "mintToSellTo": {
+      "args": [
+        1,
+        999999999999999,
+        "account"
+      ],
+      "gas_used": [
+        74699,
+        585545,
+        1204467,
+        2626147
+      ]
+    }
+  }
+}
