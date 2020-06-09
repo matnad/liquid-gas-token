@@ -45,6 +45,9 @@ jobs:
     - name: Run Unit Tests
       run: brownie test tests/unit/ -w -n auto
 
+    - name: Run Integration Tests
+      run: brownie test tests/integration/ -w -n auto --network mainnet-fork
+
   Benchmarks:
     runs-on: ubuntu-latest
 
