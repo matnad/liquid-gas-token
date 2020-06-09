@@ -78,4 +78,4 @@ jobs:
         run: brownie run benchmarks/gas_benchmarks --network mainnet-fork
 
       - name: Run Comparative Benchmarks
-          run: brownie run benchmarks/gas_token_comparison --network mainnet-fork
+        run: brownie run benchmarks/gas_token_comparison --network mainnet-fork

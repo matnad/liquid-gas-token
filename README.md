@@ -58,13 +58,12 @@ In these metrics it vastly outperforms the alternatives.
 
 ## This repository is still a work in progress
 
-To run tests or scripts, you need add the LGT Deployer account (LGT needs to be deployed at a 15 bytes address):
-```bash
-brownie accounts import gst_deployer keystore/gst_deployer.json 
-```
-Or set an *environment variable* `GST_DEPLOYER=<private key>`.
+The contract will be deployed on the test and main nets soon.
 
-Run tests with `brownie test tests/unit/ -s`.
+To run tests or scripts, clone the repo and use 
 
-`tests/unit/` can be run on a local test net.  
-`tests/gas/` require a forked main net. 
+    brownie test -C -n auto
+    
+or  
+    
+    brownie run path/to/script --network mainnet-fork 
