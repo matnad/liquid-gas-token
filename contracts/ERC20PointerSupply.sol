@@ -11,6 +11,14 @@ contract ERC20PointerSupply is IERC20 {
 
     // ****** ERC20 Pointer Supply Token
     //        --------------------------
+    //        totalSupply is stored in two variables:
+    //        The number of tokens minted and burned, where minted - burned = totalSupply.
+    //        Additionally, the supply is split into:
+    //        - ownedSupply: Number of tokens owned by accounts.
+    //        - tokenReserves: Implicitly defined as totalSupply - ownedSupply, this is the number
+    //                        of tokens "owned" by this contract.
+    //        To keep the contract more gas efficient, no Transfer events are emitted when
+    //        minting or burning tokens.
 
     mapping (address => uint256) internal _balances;
     mapping (address => mapping (address => uint256)) internal _allowances;
@@ -27,15 +35,14 @@ contract ERC20PointerSupply is IERC20 {
     /// @dev This is different from a classic ERC20 implementation as the supply is calculated
     ///      from the burned and minted tokens instead of stored in its own variable.
     /// @return Total number of tokens in circulation.
-    function totalSupply() external view override returns (uint256) {
+    function totalSupply() public view override returns (uint256) {
         return _totalMinted.sub(_totalBurned);
     }
 
-    /// @notice Return the number of tokens owned by specific addresses.
+    /// @notice Return the number of tokens owned by accounts.
     /// @dev Unowned tokens belong to this contract and their supply can be
     ///      calculated implicitly. This means we need to manually track owned tokens,
-    ///      but it makes operations on unowned tokens much cheaper.
-    ///      TotalSupply() = ownedSupply() + unownedSupply().
+    ///      but it makes operations on unowned tokens much more efficient.
     /// @return Total number of tokens owned by specific addresses.
     function ownedSupply() external view returns (uint256) {
         return _ownedSupply;
@@ -44,7 +51,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @notice Returns the amount of tokens owned by `account`.
     /// @param account The account to query for the balance.
     /// @return The amount of tokens owned by `account`.
-    function balanceOf(address account) external view override returns (uint256) {
+    function balanceOf(address account) public view override returns (uint256) {
         return _balances[account];
     }
 
@@ -56,7 +63,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param recipient The tokens are transferred to this address.
     /// @param amount The amount of tokens to be transferred.
     /// @return True if the transfer succeeded, False otherwise.
-    function transfer(address recipient, uint256 amount) external override returns (bool) {
+    function transfer(address recipient, uint256 amount) public override returns (bool) {
         _transfer(msg.sender, recipient, amount);
         return true;
     }
@@ -68,7 +75,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by `owner`.
     /// @return Remaining number of tokens that `spender` will be
     ///         allowed to spend on behalf of `owner`
-    function allowance(address owner, address spender) external view override returns (uint256) {
+    function allowance(address owner, address spender) public view override returns (uint256) {
         return _allowances[owner][spender];
     }
 
@@ -76,16 +83,15 @@ contract ERC20PointerSupply is IERC20 {
     ///         Emits an {Approval} event.
     /// @dev    IMPORTANT: Beware that changing an allowance with this method brings the risk
     ///         that someone may use both the old and the new allowance by unfortunate
-    ///         transaction ordering. One possible solution to mitigate this race
-    ///         condition is to first reduce the spender's allowance to 0 and set the
-    ///         desired value afterwards:
+    ///         transaction ordering. This contracts provides {increaseAllowance} and
+    ///         {decreaseAllowance} to mitigate this problem. See:
     ///         https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
     ///         Requirements:
     ///         - `spender` cannot be the zero address.
     /// @param spender The address that is allowed to spend the tokens held by the caller.
     /// @param amount The amount of tokens the `spender` can spend from the caller's supply.
     /// @return True if the approval succeeded, False otherwise.
-    function approve(address spender, uint256 amount) external override returns (bool) {
+    function approve(address spender, uint256 amount) public override returns (bool) {
         _approve(msg.sender, spender, amount);
         return true;
     }
@@ -102,7 +108,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param recipient The tokens are transferred to this address.
     /// @param amount The amount of tokens to be transferred.
     /// @return True if the transfer succeeded, False otherwise.
-    function transferFrom(address sender, address recipient, uint256 amount) external override returns (bool) {
+    function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool) {
         _transfer(sender, recipient, amount);
         _approve(
             sender,
@@ -121,7 +127,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by the caller.
     /// @param addedValue The amount of tokens to add to the current `allowance`.
     /// @return True if the approval succeeded, False otherwise.
-    function increaseAllowance(address spender, uint256 addedValue) external returns (bool) {
+    function increaseAllowance(address spender, uint256 addedValue) public returns (bool) {
         _approve(msg.sender, spender, _allowances[msg.sender][spender].add(addedValue));
         return true;
     }
@@ -136,7 +142,7 @@ contract ERC20PointerSupply is IERC20 {
     /// @param spender The address that is allowed to spend the tokens held by the caller.
     /// @param subtractedValue The amount of tokens to subtract from the current `allowance`.
     /// @return True if the approval succeeded, False otherwise.
-    function decreaseAllowance(address spender, uint256 subtractedValue) external returns (bool) {
+    function decreaseAllowance(address spender, uint256 subtractedValue) public returns (bool) {
         _approve(
             msg.sender,
             spender,
@@ -149,12 +155,22 @@ contract ERC20PointerSupply is IERC20 {
     // ****** Internal ERC20 Functions
     //        ------------------------
 
+    /// @dev Triggered when tokens are transferred to this contract.
+    ///      Can be overridden by an implementation to allow and handle this behaviour.
+    ///      This should emit a {Transfer} event if an ownership change is made.
+    function _transferToSelf(address sender, uint256 amount) internal virtual {
+        revert("ERC20: transfer to contract");
+    }
+
     function _transfer(address sender, address recipient, uint256 amount) internal virtual {
         require(recipient != address(0), "ERC20: transfer to zero address");
-
-        _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer exceeds balance");
-        _balances[recipient] += amount;
-        emit Transfer(sender, recipient, amount);
+        if (recipient == address(this)) {
+            _transferToSelf(sender, amount);
+        } else {
+            _balances[sender] = _balances[sender].sub(amount, "ERC20: transfer exceeds balance");
+            _balances[recipient] += amount;
+            emit Transfer(sender, recipient, amount);
+        }
     }
 
     function _approve(address owner, address spender, uint256 amount) internal virtual {
