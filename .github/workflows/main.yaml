@@ -9,7 +9,7 @@ name: main workflow
 
 env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  WEB3_INFURA_PROJECT_ID: 0888c9df49d74a52b6c400eeeda9debf
+  WEB3_INFURA_PROJECT_ID: 272d125948404ff8a8dc6a573d2015d7
 
 jobs:
 
@@ -46,7 +46,7 @@ jobs:
       run: brownie test tests/unit/ -w -n auto
 
     - name: Run Integration Tests
-      run: brownie test tests/integration/ -w -n auto --network mainnet-fork
+      run: brownie test tests/integration/ -w -n auto
 
   Benchmarks:
     runs-on: ubuntu-latest
