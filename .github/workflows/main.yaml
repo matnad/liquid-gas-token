@@ -79,4 +79,4 @@ jobs:
         run: brownie pm install OpenZeppelin/openzeppelin-contracts@3.0.1
 
       - name: Run Benchmarks
-        run: brownie test tests/benchmark/ -s -w --network mainnet-fork
+        run: brownie run benchmarks/main --network mainnet-fork
