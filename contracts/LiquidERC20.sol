@@ -10,10 +10,13 @@ contract LiquidERC20 is ERC20PointerSupply {
 
     // ***** Liquidity Pool
     //       --------------
-    //       Integrated Liquidity Pool for an ERC20 Token.
+    //       Integrated Liquidity Pool for an ERC20 Pointer Supply Token.
     //       More efficient due to shortcuts in the ownership transfers.
     //       Modelled after Uniswap V1 by Hayden Adams:
     //       https://github.com/Uniswap/uniswap-v1/blob/master/contracts/uniswap_exchange.vy
+    //       Sell and Buy events are not implemented in the interest of gas efficiency.
+    //       Liquidity shares do not adhere to ERC20 specifications.
+    //       However, a subset of ERC20-like functions are implemented.
 
     uint256 internal _poolTotalSupply;
     mapping (address => uint256) internal _poolBalances;
@@ -51,7 +54,8 @@ contract LiquidERC20 is ERC20PointerSupply {
     }
 
     // *** Constructor
-    /// @dev start with initial liquidity. Contract must be pre-funded.
+    /// @dev Start with initial liquidity. Contract must be pre-funded.
+    ///      This initial liquidity must never be removed.
     constructor() public {
         // Implementation must mint at least 1 token to the pool during deployment.
         uint ethReserve = address(this).balance;
@@ -59,6 +63,10 @@ contract LiquidERC20 is ERC20PointerSupply {
         _poolTotalSupply += ethReserve;
         _poolBalances[msg.sender] += ethReserve;
     }
+
+    // ***** Liquidity Pool
+    //       --------------------
+    //       Add, remove or transfer liquidity shares.
 
     /// @notice Add liquidity to the pool and receive liquidity shares. Must deposit
     ///         an equal amount of ether and tokens at the current exchange rate.
@@ -69,8 +77,6 @@ contract LiquidERC20 is ERC20PointerSupply {
     ///        ether liquidity. Will revert if too many tokens are needed.
     /// @param deadline The time after which the transaction can no longer be executed.
     ///        Will revert if the current timestamp is after the deadline.
-    /// @dev Requirements:
-    ///      - The initial liquidity must be greater than 1 gwei.
     /// @return The amount of liquidity shares created.
     function addLiquidity(uint256 minLiquidity, uint256 maxTokens, uint256 deadline)
         external
@@ -139,14 +145,15 @@ contract LiquidERC20 is ERC20PointerSupply {
         _poolBalances[msg.sender] = _poolBalances[msg.sender].sub(amount);
         _poolTotalSupply = totalLiquidity.sub(amount);
 
-        // Refund LGTs
+        // Transfer tokens
         _balances[msg.sender] += tokenAmount;
         _ownedSupply = ownedSupply + tokenAmount;
 
         emit RemoveLiquidity(msg.sender, ethAmount, tokenAmount);
 
-        // Refund ETH
-        msg.sender.transfer(ethAmount);
+        // Transfer ether
+        msg.sender.call{value: ethAmount}("");
+
         return (ethAmount, tokenAmount);
     }
 
@@ -276,7 +283,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         _balances[recipient] += tokensBought;
         _ownedSupply = ownedSupply + tokensBought;
         if (ethRefund != 0) {
-            buyer.transfer(ethRefund);
+            buyer.call{value: ethRefund}("");
         }
         return ethSold;
     }
@@ -342,8 +349,15 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(ethBought >= minEth); // dev: tokens not worth enough
         _balances[buyer] = _balances[buyer].sub(tokensSold, "LGT: amount exceeds balance");
         _ownedSupply = ownedSupply.sub(tokensSold);
-        recipient.transfer(ethBought);
+        recipient.call{value: ethBought}("");
         return ethBought;
+    }
+
+    /// @dev Transferring tokens to this contract will sell them.
+    ///      User cannot specify minEth or deadline.
+    function _transferToSelf(address sender, uint256 amount) internal override {
+        address payable _sender = payable(sender);
+        tokenToEthInput(amount, 1, now, _sender, _sender);
     }
 
     /// @notice Convert tokens to ether. Specify the exact input (in tokens) and
@@ -402,7 +416,7 @@ contract LiquidERC20 is ERC20PointerSupply {
         require(maxTokens >= tokensSold); // dev: need more tokens to sell
         _balances[buyer] = _balances[buyer].sub(tokensSold, "LGT: amount exceeds balance");
         _ownedSupply = ownedSupply.sub(tokensSold);
-        recipient.transfer(ethBought);
+        recipient.call{value: ethBought}("");
         return tokensSold;
     }
 
@@ -455,7 +469,6 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @param ethSold The exact amount of ether you are selling.
     /// @return The amount of tokens that can be bought with `ethSold` ether.
     function getEthToTokenInputPrice(uint256 ethSold) public view returns(uint256) {
-        require(ethSold != 0); // dev: no eth to sell
         uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         return getInputPrice(ethSold, address(this).balance, tokenReserve);
     }
@@ -472,7 +485,6 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @param tokensSold The exact amount of tokens you are selling.
     /// @return The amount of ether you receive for selling `tokensSold` tokens.
     function getTokenToEthInputPrice(uint256 tokensSold) public view returns (uint256) {
-        require(tokensSold != 0); // dev: can't sell less than one token
         uint256 tokenReserve = _totalMinted.sub(_totalBurned + _ownedSupply);
         return getInputPrice(tokensSold, tokenReserve, address(this).balance);
     }

@@ -20,6 +20,16 @@ def test_mint_to_sell(liquid_lgt, accounts):
     assert liquid_lgt.poolTokenReserves() == 21 + 10
 
 
+def test_mint_to_sell_opt(liquid_lgt, accounts):
+    initial_owned_supply = liquid_lgt.ownedSupply()
+    initial_balance = accounts[4].balance()
+    expected_eth_payout = liquid_lgt.getTokenToEthInputPrice(20)
+    liquid_lgt.mintToSell9630191(20, {'from': accounts[4]})
+    assert accounts[4].balance() - initial_balance == expected_eth_payout
+    assert liquid_lgt.ownedSupply() == initial_owned_supply
+    assert liquid_lgt.poolTokenReserves() == 21 + 20
+
+
 def test_mint_to_sell_to(liquid_lgt, accounts):
     initial_balance4 = accounts[4].balance()
     initial_balance5 = accounts[5].balance()
@@ -30,6 +40,17 @@ def test_mint_to_sell_to(liquid_lgt, accounts):
     assert accounts[5].balance() - initial_balance5 == expected_eth_payout
     assert liquid_lgt.ownedSupply() == 10
     assert liquid_lgt.poolTokenReserves() == 21 + 20
+
+
+def test_mint_to_sell_to_opt(liquid_lgt, accounts):
+    initial_balance4 = accounts[4].balance()
+    initial_balance5 = accounts[5].balance()
+    expected_eth_payout = liquid_lgt.getTokenToEthInputPrice(30)
+    liquid_lgt.mintToSellTo25630722(30, accounts[5], {'from': accounts[4]})
+    assert accounts[4].balance() == initial_balance4
+    assert accounts[5].balance() - initial_balance5 == expected_eth_payout
+    assert liquid_lgt.ownedSupply() == 10
+    assert liquid_lgt.poolTokenReserves() == 21 + 30
 
 
 def test_deadline_reverts(liquid_lgt, accounts):

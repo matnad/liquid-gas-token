@@ -126,17 +126,17 @@ contract LiquidGasToken is LiquidERC20 {
 
     // *** Mint to owner
 
-    /// @notice Mint personally owned Liquid Gas Tokens
-    /// @param amount The amount of tokens to mint
+    /// @notice Mint personally owned Liquid Gas Tokens.
+    /// @param amount The amount of tokens to mint.
     function mint(uint256 amount) external {
         _createContracts(amount, _totalMinted);
         _balances[msg.sender] += amount;
         _ownedSupply += amount;
     }
 
-    /// @notice Mint Liquid Gas Tokens for `recipient`
-    /// @param amount The amount of tokens to mint
-    /// @param recipient The owner of the minted Liquid Gas Tokens
+    /// @notice Mint Liquid Gas Tokens for `recipient`.
+    /// @param amount The amount of tokens to mint.
+    /// @param recipient The owner of the minted Liquid Gas Tokens.
     function mintFor(uint256 amount, address recipient) external {
         _createContracts(amount, _totalMinted);
         _balances[recipient] += amount;
@@ -163,9 +163,9 @@ contract LiquidGasToken is LiquidERC20 {
     /// @param deadline The time after which the transaction can no longer be executed.
     ///        Will revert if the current timestamp is after the deadline.
     /// @param recipient Liquidity shares are created for this address.
-    /// @return tokenAmount Amount of tokens minted and invested
-    /// @return ethAmount Amount of ether invested
-    /// @return liquidityCreated Number of liquidity shares created
+    /// @return tokenAmount Amount of tokens minted and invested.
+    /// @return ethAmount Amount of ether invested.
+    /// @return liquidityCreated Number of liquidity shares created.
     function mintToLiquidity(
         uint256 maxTokens,
         uint256 minLiquidity,
@@ -185,7 +185,7 @@ contract LiquidGasToken is LiquidERC20 {
         tokenAmount = maxTokens;
         uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
         uint ethReserve = address(this).balance - msg.value;
-        ethAmount = (maxTokens.mul(ethReserve) / tokenReserve).sub(1);
+        ethAmount = (tokenAmount.mul(ethReserve) / tokenReserve).sub(1);
         if (ethAmount > msg.value) {
             // reduce amount of tokens minted to provide maximum possible liquidity
             tokenAmount = (msg.value + 1).mul(tokenReserve) / ethReserve;
@@ -206,7 +206,7 @@ contract LiquidGasToken is LiquidERC20 {
 
         // refund excess ether
         if (msg.value > ethAmount) {
-            msg.sender.transfer(msg.value - ethAmount);
+            msg.sender.call{value: msg.value - ethAmount}("");
         }
         return (tokenAmount, ethAmount, liquidityCreated);
     }
@@ -217,8 +217,6 @@ contract LiquidGasToken is LiquidERC20 {
     ///         transfer the ether to the `recipient`.
     /// @dev This is much more efficient than minting tokens and then selling them
     ///      in two separate steps.
-    ///      Requirements:
-    ///      - `recipient` can't be this contract or the zero address
     /// @param amount The amount of tokens to mint and sell.
     /// @param minEth The minimum amount of ether to receive for the transaction.
     ///         Will revert if the tokens don't sell for enough ether;
@@ -232,7 +230,7 @@ contract LiquidGasToken is LiquidERC20 {
         uint256 deadline,
         address payable recipient
     )
-        external
+        public
         returns (uint256)
     {
         require(deadline >= now); // dev: deadline passed
@@ -242,7 +240,7 @@ contract LiquidGasToken is LiquidERC20 {
         uint256 ethBought = getInputPrice(amount, tokenReserve, address(this).balance);
         require(ethBought >= minEth); // dev: tokens not worth enough
         _createContracts(amount, totalMinted);
-        recipient.transfer(ethBought);
+        recipient.call{value: ethBought}("");
         return ethBought;
     }
 
@@ -264,15 +262,7 @@ contract LiquidGasToken is LiquidERC20 {
         external
         returns (uint256)
     {
-        require(deadline >= now); // dev: deadline passed
-        require(amount != 0); // dev: must sell one or more tokens
-        uint256 totalMinted = _totalMinted;
-        uint256 tokenReserve = totalMinted.sub(_totalBurned + _ownedSupply);
-        uint256 ethBought = getInputPrice(amount, tokenReserve, address(this).balance);
-        require(ethBought >= minEth); // dev: tokens not worth enough
-        _createContracts(amount, totalMinted);
-        msg.sender.transfer(ethBought);
-        return ethBought;
+        return mintToSellTo(amount, minEth, deadline, msg.sender);
     }
 
     // ***** Gas Token Freeing
@@ -296,7 +286,7 @@ contract LiquidGasToken is LiquidERC20 {
         return true;
     }
 
-    /// @notice Free `tokenAmount` of Liquid Gas Tokens from the `owners`'s balance.
+    /// @notice Free `amount` of Liquid Gas Tokens from the `owners`'s balance.
     /// @param amount The amount of tokens to free
     /// @param owner The `owner` of the tokens. The `sender` must have an allowance.
     /// @return True if `tokenAmount` tokens could be freed, False otherwise.
@@ -318,13 +308,13 @@ contract LiquidGasToken is LiquidERC20 {
 
     // *** Free from liquidity pool
 
-    /// @notice Buy `tokenAmount` tokens from the liquidity pool and immediately free them.
+    /// @notice Buy `amount` tokens from the liquidity pool and immediately free them.
     /// @param amount The amount of tokens to buy and free.
     /// @param deadline The time after which the transaction can no longer be executed.
     ///        Will revert if the current timestamp is after the deadline.
     /// @param refundTo Any excess ether will be refunded to this address.
     /// @dev This will not revert unless an unexpected error occurs. Instead it will return 0.
-    /// @return The amount of ether spent to buy `tokenAmount` tokens.
+    /// @return The amount of ether spent to buy `amount` tokens.
     function buyAndFree(
         uint256 amount,
         uint256 deadline,
@@ -335,25 +325,25 @@ contract LiquidGasToken is LiquidERC20 {
         returns (uint256)
     {
         if (deadline < now) {
-            refundTo.transfer(msg.value);
+            refundTo.call{value: msg.value}("");
             return 0;
         }
         uint256 totalBurned = _totalBurned;
         uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
         if (tokenReserve < amount) {
-            refundTo.transfer(msg.value);
+            refundTo.call{value: msg.value}("");
             return 0;
         }
         uint256 ethReserve = address(this).balance - msg.value;
         uint256 ethSold = getOutputPrice(amount, ethReserve, tokenReserve);
         if (msg.value < ethSold) {
-            refundTo.transfer(msg.value);
+            refundTo.call{value: msg.value}("");
             return 0;
         }
         uint256 ethRefund = msg.value - ethSold;
         _destroyContracts(amount, totalBurned);
         if (ethRefund != 0) {
-            refundTo.transfer(ethRefund);
+            refundTo.call{value: ethRefund}("");
         }
         return ethSold;
     }
@@ -383,5 +373,68 @@ contract LiquidGasToken is LiquidERC20 {
         }
         _destroyContracts(tokensBought, totalBurned);
         return tokensBought;
+    }
+
+    // ***** Advanced Functions !!! USE AT YOUR OWN RISK !!!
+    //       -----------------------------------------------
+    //       These functions are gas optimized and intended for experienced users.
+    //       The function names are constructed to have 3 or 4 leading zero bytes
+    //       in the function selector.
+    //       Additionally, all checks have been omitted and need to be done before
+    //       sending the call if desired.
+    //       There are also no return values to further save gas.
+
+
+    /// @notice Mint Liquid Gas Tokens and immediately sell them for ether.
+    /// @dev 3 zero bytes function selector (0x000000079) and removed all checks.
+    ///      !!! USE AT YOUR OWN RISK !!!
+    /// @param amount The amount of tokens to mint and sell.
+    function mintToSell9630191(uint256 amount) external {
+        uint256 totalMinted = _totalMinted;
+        uint256 ethBought = getInputPrice(
+            amount,
+            totalMinted.sub(_totalBurned + _ownedSupply),
+            address(this).balance
+        );
+        _createContracts(amount, totalMinted);
+        msg.sender.call{value: ethBought}("");
+    }
+
+    /// @notice Mint Liquid Gas Tokens, immediately sell them for ether and
+    ///         transfer the ether to the `recipient`.
+    /// @dev 3 zero bytes function selector (0x00000056) and removed all checks.
+    ///      !!! USE AT YOUR OWN RISK !!!
+    /// @param amount The amount of tokens to mint and sell.
+    /// @param recipient The address the ether is sent to
+    function mintToSellTo25630722(uint256 amount, address payable recipient) external {
+        uint256 totalMinted = _totalMinted;
+        uint256 ethBought = getInputPrice(
+            amount,
+            totalMinted.sub(_totalBurned + _ownedSupply),
+            address(this).balance
+        );
+        _createContracts(amount, totalMinted);
+        recipient.call{value: ethBought}("");
+    }
+
+
+    /// @notice Buy `amount` tokens from the liquidity pool and immediately free them.
+    ///         Make sure to pass the exact amount for tokens and sent ether:
+    ///             - There are no refunds for unspent ether!
+    ///             - Get the exact price by calling getEthToTokenOutputPrice(`amount`)
+    ///               before sending the call in the same transaction.
+    /// @dev 4 zero bytes function selector (0x00000000) and removed all checks.
+    ///      !!! USE AT YOUR OWN RISK !!!
+    /// @param amount The amount of tokens to buy and free.
+    function buyAndFree22457070633(uint256 amount) external payable {
+        uint256 totalBurned = _totalBurned;
+        uint256 ethSold = getOutputPrice(
+            amount,
+            address(this).balance - msg.value,
+            _totalMinted.sub(totalBurned + _ownedSupply)
+        );
+        if (msg.value >= ethSold) {
+            _destroyContracts(amount, totalBurned);
+        }
     }
 }
