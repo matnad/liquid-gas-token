@@ -168,3 +168,15 @@ def test_output_to_lgt_reverts(liquidLgt, accounts):
 def test_output_to_zero_reverts(liquidLgt, accounts):
     with brownie.reverts("dev: can't send to zero address"):
         liquidLgt.tokenToEthTransferOutput(1, 1, DEADLINE, ZERO_ADDRESS, {'from': accounts[5]})
+
+
+def test_transfer_to_self(liquidLgt, accounts):
+    initial_balance = accounts[5].balance()
+    initial_reserve = liquidLgt.balance()
+
+    eth_bought = token_to_eth_output(5)
+    liquidLgt.transfer(liquidLgt, 5, {'from': accounts[5]})
+
+    assert liquidLgt.balanceOf(accounts[5]) == account5_supply - 5
+    assert initial_balance + eth_bought == accounts[5].balance()
+    assert initial_reserve - eth_bought == liquidLgt.balance()

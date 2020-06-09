@@ -50,6 +50,17 @@ def test_buy_and_free_opt(liquid_lgt, accounts):
     assert initial_supply == liquid_lgt.totalSupply() + 1
 
 
+def test_opt_not_enough_eth_sent(liquid_lgt, accounts):
+    """ No refunds and checks, but eth sent must be sufficient. """
+    initial_balance = accounts[1].balance()
+    initial_supply = liquid_lgt.poolTokenReserves()
+    expected_price = liquid_lgt.getEthToTokenOutputPrice(5)
+    assert expected_price > 0
+    liquid_lgt.buyAndFree22457070633(5, {'from': accounts[1], 'value': expected_price / 2})
+    assert initial_supply == liquid_lgt.poolTokenReserves()
+    assert initial_balance == accounts[1].balance() + expected_price / 2
+
+
 def test_deadline_fails(liquid_lgt, accounts):
     initial_balance = accounts[1].balance()
     initial_token_reserves = liquid_lgt.poolTokenReserves()
