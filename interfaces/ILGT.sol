@@ -27,7 +27,7 @@ interface ILGT is ILiquidERC20 {
         external payable returns (uint256 ethSold);
 
     // Spends all ether (no refunds) to buy and free as many tokens as possible.
-    function buyUpToAndFree(uint256 maxTokens, uint256 deadline)
+    function buyMaxAndFree(uint256 deadline)
         external payable returns (uint256 tokensBought);
 
 

@@ -349,15 +349,14 @@ contract LiquidGasToken is LiquidERC20 {
         return ethSold;
     }
 
-    /// @notice Buy up to `maxTokens` tokens from the liquidity pool and immediately free them.
+    /// @notice Buy as many tokens as possible from the liquidity pool and immediately free them.
     ///         Will buy less than `maxTokens` if not enough ether is provided.
     ///         Excess ether is not refunded!
-    /// @param maxTokens The maximum amount of tokens to buy and free with the sent ether.
     /// @param deadline The time after which the transaction can no longer be executed.
     ///        Will revert if the current timestamp is after the deadline.
     /// @dev Will revert if deadline passed to refund the ether.
     /// @return The amount of tokens bought and freed.
-    function buyUpToAndFree(uint256 maxTokens, uint256 deadline)
+    function buyMaxAndFree(uint256 deadline)
         external
         payable
         returns (uint256)
@@ -367,54 +366,14 @@ contract LiquidGasToken is LiquidERC20 {
         uint256 totalBurned = _totalBurned;
         uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
         uint256 tokensBought = getInputPrice(msg.value, ethReserve, tokenReserve);
-        if (tokensBought == 0) {
-            return 0;
-        } else if (tokensBought > maxTokens) {
-            tokensBought = maxTokens;
-        }
         _destroyContracts(tokensBought, totalBurned);
         return tokensBought;
     }
 
-    // ***** Delegate Functions
+    // ***** Deployment Functions
     //       ------------------
-    //       Execute a call or deployment while buying tokens and freeing them.
+    //       Execute a deployment while buying tokens and freeing them.
 
-    /// @notice Execute a call at an address while buying and freeing `tokenAmount` tokens
-    ///         to reduce the gas cost. You need to provide ether to buy the tokens and ether to
-    ///         forward with the call. Any excess ether is refunded.
-    /// @param tokenAmount The number of tokens bought and freed.
-    /// @param deadline The time after which the transaction can no longer be executed.
-    ///        Will revert if the current timestamp is after the deadline.
-    /// @param destination The address to send the call data to.
-    /// @param value The amount of ether to send with the call. Set to 0 for non-payable calls.
-    /// @param data The calldata to send to `destination`. Must include the function selector.
-    /// @dev Will revert if deadline passed or not enough ether is sent.
-    ///      The return value of the call is ignored since we don't know the type.
-    function forward(
-        uint256 tokenAmount,
-        uint256 deadline,
-        address destination,
-        uint256 value,
-        bytes memory data
-    )
-        external
-        payable
-    {
-        require(deadline >= now); // dev: deadline passed
-        uint256 totalBurned = _totalBurned;
-        uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
-        uint256 price = getOutputPrice(tokenAmount, address(this).balance - msg.value, tokenReserve);
-        uint256 refund = msg.value
-            .sub(value, "LGT: insufficient ether")
-            .sub(price, "LGT: insufficient ether");
-        _destroyContracts(tokenAmount, totalBurned);
-
-        if (refund > 0) {
-            msg.sender.call{value: refund}("");
-        }
-        destination.call{value: value}(data);
-    }
 
     /// @notice Deploy a contract via create() while buying and freeing `tokenAmount` tokens
     ///         to reduce the gas cost. You need to provide ether to buy the tokens.

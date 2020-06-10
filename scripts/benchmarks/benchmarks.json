@@ -23,18 +23,6 @@
       ],
       "value": "getEthToTokenOutputPrice"
     },
-    "buyUpToAndFree": {
-      "args": [
-        999999999999999
-      ],
-      "gas_used": [
-        18056,
-        59041,
-        108808,
-        222981
-      ],
-      "value": "getEthToTokenOutputPrice"
-    },
     "free": {
       "args": [],
       "gas_used": [

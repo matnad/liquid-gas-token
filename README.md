@@ -35,29 +35,29 @@ Benchmarks were calculated using a [Brownie](https://github.com/eth-brownie/brow
 ### Minting 4 tokens
 ```
 GST2: 179564 gas (mint to balance)
-CHI: 180463 gas (mint to balance)
-LGT: 185045 gas (mint to balance)
+ CHI: 180463 gas (mint to balance)
+ LGT: 185045 gas (mint to balance)
 ```
 
 ### Minting 4 tokens and selling them on Uniswap
 ```
 GST2: 245360 gas (mint and sell)
-CHI: 246548 gas (mint and sell)
-LGT: 183214 gas (mint and sell)
+ CHI: 246548 gas (mint and sell)
+ LGT: 183214 gas (mint and sell)
 ```
 
 ### Burning 1000000 gas and freeing 25 tokens
 ```
 GST2: 609178 gas (free from owned)
-CHI: 599767 gas (free from owned)
-LGT: 598055 gas (free from owned)
+ CHI: 599767 gas (free from owned)
+ LGT: 598055 gas (free from owned)
 ```
 
 ### Buying 25 tokens on Uniswap, then burning 1000000 gas and freeing the tokens
 ```
 GST2: 661449 gas (buy and free)
-CHI: 651093 gas (buy and free)
-LGT: 592585 gas (buy and free)
+ CHI: 651093 gas (buy and free)
+ LGT: 592585 gas (buy and free)
 ```
 
 LGT is optimized to buy or sell tokens in the same transaction they are freed or minted.

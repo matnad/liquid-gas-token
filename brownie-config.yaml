@@ -1,6 +1,10 @@
 # automatically fetch contract sources from Etherscan
 autofetch_sources: true
 
+networks:
+  development:
+    gas_price: 0
+
 compiler:
     solc:
         optimizer:
