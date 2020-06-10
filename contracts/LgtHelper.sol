@@ -50,10 +50,10 @@ contract LgtHelper {
         lgt.buyAndFree22457070633{value: msg.value}(tokenAmount);
     }
 
-    function burnBuyUpToAndFree(uint256 burn, uint256 tokenAmount)
+    function burnBuyMaxAndFree(uint256 burn)
         public payable returns (uint256 ethSold)
     {
         burnGas(burn);
-        return lgt.buyUpToAndFree{value: msg.value}(tokenAmount, now);
+        return lgt.buyMaxAndFree{value: msg.value}(now);
     }
 }

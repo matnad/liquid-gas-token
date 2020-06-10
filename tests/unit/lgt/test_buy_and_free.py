@@ -99,32 +99,22 @@ def test_no_eth_sent_fails(liquid_lgt, accounts):
     assert initial_balance == accounts[1].balance()
 
 
-def test_buy_up_to_and_free(liquid_lgt, accounts):
+def test_buy_max_and_free(liquid_lgt, accounts):
     expected_tokens = liquid_lgt.getEthToTokenInputPrice(Wei("0.05 ether"))
     assert expected_tokens < 50
-    tx = liquid_lgt.buyUpToAndFree(50, DEADLINE, {'from': accounts[1], 'value': "0.05 ether"})
+    tx = liquid_lgt.buyMaxAndFree(DEADLINE, {'from': accounts[1], 'value': "0.05 ether"})
     assert tx.return_value == expected_tokens
 
 
-def test_buy_up_to_zero_and_free(liquid_lgt, accounts):
-    """ Buying up to zero will not refund anything. """
-    initial_balance = accounts[1].balance()
-    expected_tokens = liquid_lgt.getEthToTokenInputPrice(Wei("0.05 ether"))
-    assert expected_tokens < 50
-    tx = liquid_lgt.buyUpToAndFree(0, DEADLINE, {'from': accounts[1], 'value': "0.05 ether"})
-    assert tx.return_value == 0
-    assert initial_balance == accounts[1].balance() + "0.05 ether"
-
-
-def test_up_to_deadline_reverts(liquid_lgt, accounts):
+def test_max_deadline_reverts(liquid_lgt, accounts):
     initial_token_reserves = liquid_lgt.poolTokenReserves()
     with brownie.reverts("dev: deadline passed"):
-        liquid_lgt.buyUpToAndFree(5, 1, {'from': accounts[1], 'value': "1 ether"})
+        liquid_lgt.buyMaxAndFree(1, {'from': accounts[1], 'value': "1 ether"})
     assert liquid_lgt.poolTokenReserves() == initial_token_reserves
 
 
-def test_up_to_no_eth_fails(liquid_lgt, accounts):
+def test_max_no_eth_fails(liquid_lgt, accounts):
     initial_token_reserves = liquid_lgt.poolTokenReserves()
-    tx = liquid_lgt.buyUpToAndFree(10, DEADLINE, {'from': accounts[1]})
+    tx = liquid_lgt.buyMaxAndFree(DEADLINE, {'from': accounts[1]})
     assert tx.return_value == 0
     assert liquid_lgt.poolTokenReserves() == initial_token_reserves

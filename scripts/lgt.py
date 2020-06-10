@@ -13,7 +13,7 @@ def main():
 
     helper = accounts[0].deploy(LgtHelper)
 
-    for i in range(5):
+    for i in range(3):
         lgt.approve(helper, 2**256-1, {'from': accounts[i]})
 
     return lgt, helper, accounts[1]
