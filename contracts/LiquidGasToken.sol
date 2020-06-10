@@ -376,6 +376,110 @@ contract LiquidGasToken is LiquidERC20 {
         return tokensBought;
     }
 
+    // ***** Delegate Functions
+    //       ------------------
+    //       Execute a call or deployment while buying tokens and freeing them.
+
+    /// @notice Execute a call at an address while buying and freeing `tokenAmount` tokens
+    ///         to reduce the gas cost. You need to provide ether to buy the tokens and ether to
+    ///         forward with the call. Any excess ether is refunded.
+    /// @param tokenAmount The number of tokens bought and freed.
+    /// @param deadline The time after which the transaction can no longer be executed.
+    ///        Will revert if the current timestamp is after the deadline.
+    /// @param destination The address to send the call data to.
+    /// @param value The amount of ether to send with the call. Set to 0 for non-payable calls.
+    /// @param data The calldata to send to `destination`. Must include the function selector.
+    /// @dev Will revert if deadline passed or not enough ether is sent.
+    ///      The return value of the call is ignored since we don't know the type.
+    function forward(
+        uint256 tokenAmount,
+        uint256 deadline,
+        address destination,
+        uint256 value,
+        bytes memory data
+    )
+        external
+        payable
+    {
+        require(deadline >= now); // dev: deadline passed
+        uint256 totalBurned = _totalBurned;
+        uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
+        uint256 price = getOutputPrice(tokenAmount, address(this).balance - msg.value, tokenReserve);
+        uint256 refund = msg.value
+            .sub(value, "LGT: insufficient ether")
+            .sub(price, "LGT: insufficient ether");
+        _destroyContracts(tokenAmount, totalBurned);
+
+        if (refund > 0) {
+            msg.sender.call{value: refund}("");
+        }
+        destination.call{value: value}(data);
+    }
+
+    /// @notice Deploy a contract via create() while buying and freeing `tokenAmount` tokens
+    ///         to reduce the gas cost. You need to provide ether to buy the tokens.
+    ///         Any excess ether is refunded.
+    /// @param tokenAmount The number of tokens bought and freed.
+    /// @param deadline The time after which the transaction can no longer be executed.
+    ///        Will revert if the current timestamp is after the deadline.
+    /// @param bytecode The bytecode of the contract you want to deploy.
+    /// @dev Will revert if deadline passed or not enough ether is sent.
+    ///      Can't send ether with deployment. Pre-fund the address instead.
+    /// @return contractAddress The address where the contract was deployed.
+
+    function deploy(uint256 tokenAmount, uint256 deadline, bytes memory bytecode)
+        external
+        payable
+        returns (address contractAddress)
+    {
+        require(deadline >= now); // dev: deadline passed
+        uint256 totalBurned = _totalBurned;
+        uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
+        uint256 price = getOutputPrice(tokenAmount, address(this).balance - msg.value, tokenReserve);
+        uint256 refund = msg.value.sub(price, "LGT: insufficient ether");
+        _destroyContracts(tokenAmount, totalBurned);
+
+        if (refund > 0) {
+            msg.sender.call{value: refund}("");
+        }
+        assembly {
+            contractAddress := create(0, add(bytecode, 32), mload(bytecode))
+        }
+        return contractAddress;
+    }
+
+    /// @notice Deploy a contract via create2() while buying and freeing `tokenAmount` tokens
+    ///         to reduce the gas cost. You need to provide ether to buy the tokens.
+    ///         Any excess ether is refunded.
+    /// @param tokenAmount The number of tokens bought and freed.
+    /// @param deadline The time after which the transaction can no longer be executed.
+    ///        Will revert if the current timestamp is after the deadline.
+    /// @param salt The salt is used for create2() to determine the deployment address.
+    /// @param bytecode The bytecode of the contract you want to deploy.
+    /// @dev Will revert if deadline passed or not enough ether is sent.
+    ///      Can't send ether with deployment. Pre-fund the address instead.
+    /// @return contractAddress The address where the contract was deployed.
+    function create2(uint256 tokenAmount, uint256 deadline, uint256 salt, bytes memory bytecode)
+        external
+        payable
+        returns (address contractAddress)
+    {
+        require(deadline >= now); // dev: deadline passed
+        uint256 totalBurned = _totalBurned;
+        uint256 tokenReserve = _totalMinted.sub(totalBurned + _ownedSupply);
+        uint256 price = getOutputPrice(tokenAmount, address(this).balance - msg.value, tokenReserve);
+        uint256 refund = msg.value.sub(price, "LGT: insufficient ether");
+        _destroyContracts(tokenAmount, totalBurned);
+
+        if (refund > 0) {
+            msg.sender.call{value: refund}("");
+        }
+        assembly {
+            contractAddress := create2(0, add(bytecode, 32), mload(bytecode), salt)
+        }
+        return contractAddress;
+    }
+
     // ***** Advanced Functions !!! USE AT YOUR OWN RISK !!!
     //       -----------------------------------------------
     //       These functions are gas optimized and intended for experienced users.
