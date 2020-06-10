@@ -25,6 +25,7 @@ contract LGTRelayer {
     payable
     returns (uint256)
     {
+        require(value <= msg.value);
         uint256 tokensBought = lgt.buyMaxAndFree{value : msg.value - value}(deadline);
         destination.call{value : value}(data);
         return tokensBought;
@@ -50,6 +51,7 @@ contract LGTRelayer {
     payable
     returns (uint256)
     {
+        require(value <= msg.value);
         uint256 ethSold = lgt.buyAndFree{value : msg.value - value}(tokenAmount, deadline, msg.sender);
         destination.call{value : value}(data);
         return ethSold;
