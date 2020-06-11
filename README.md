@@ -20,7 +20,7 @@ In addition to the usual mint and free functions LGT offers functions to very ef
  * mint and add to liquidity
  * buy and free
 
-The full interface can be seen here: [`ILGT`](interfaces/ILGT.sol), [`ILiquidERC20`](interfaces/ILiquidERC20.sol), [`IERC20`](contracts/token/ERC20/IERC20.sol)
+The full interface can be seen here: [`ILGT`](interfaces/ILGT.sol), [`ILiquidERC20`](interfaces/ILiquidERC20.sol), [`IERC20`](https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/IERC20.sol)
 
 Gas price arbitrage can very easily be realized by minting LGT and directly receiving ether in return in the same transaction. This function is open to every user (and bot ;-)). The amount of received ether can be verified before sending the transaction, giving the minter full control and guaranteeing the arbitrage profit will be fully realised. 
 
@@ -28,7 +28,7 @@ Gas price arbitrage can very easily be realized by minting LGT and directly rece
 
 Comparative benchmarks for GST2, CHI and LGT. For GST2 and CHI, uniswap is used to do the buying and selling, LGT uses its own liquidity pool.
 
-This does not give a full representation of gas cost, just a snapshot with the used token amounts. Care has been taken that all variables are initialized and the comparison is as fair as possible.
+This does not give a full representation of gas costs, just a snapshot with the used token amounts. Care has been taken that all variables are initialized and the comparison is as fair as possible.
 
 Benchmarks were calculated using a [Brownie](https://github.com/eth-brownie/brownie) script on a [Ganache](https://github.com/trufflesuite/ganache-cli) forked main net. You can see the script and details [here](scripts/benchmarks/gas_token_comparison.py).
 

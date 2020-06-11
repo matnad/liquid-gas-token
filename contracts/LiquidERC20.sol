@@ -32,6 +32,11 @@ contract LiquidERC20 is ERC20PointerSupply {
         uint256 indexed eth_amount,
         uint256 indexed token_amount
     );
+    event TransferLiquidity(
+        address indexed from,
+        address indexed to,
+        uint256 value
+    );
 
     /// @notice Returns the amount of liquidity shares owned by `account`.
     /// @param account The account to query for the balance.
@@ -52,6 +57,23 @@ contract LiquidERC20 is ERC20PointerSupply {
     /// @return The amount of tokens in the liquidity pool.
     function poolTokenReserves() external view returns (uint256) {
         return _totalMinted.sub(_totalBurned + _ownedSupply);
+    }
+
+    /// @notice Moves `amount` liquidity shares from the caller's account to `recipient`.
+    ///         Emits a {Transfer} event.
+    /// @dev Requirements:
+    //       - `recipient` cannot be the zero address.
+    //       - the caller must have a balance of at least `amount`.
+    /// @param recipient The tokens are transferred to this address.
+    /// @param amount The amount of tokens to be transferred.
+    /// @return True if the transfer succeeded, False otherwise.
+    function poolTransfer(address recipient, uint256 amount) external returns (bool) {
+        require(recipient != address(0)); // dev: can't transfer liquidity to zero address
+        require(recipient != address(this)); // dev: can't transfer liquidity to token contract
+        _poolBalances[msg.sender] = _poolBalances[msg.sender].sub(amount, "LGT: transfer exceeds balance");
+        _poolBalances[recipient]= _poolBalances[recipient].add(amount);
+        emit TransferLiquidity(msg.sender, recipient, amount);
+        return true;
     }
 
     // *** Constructor

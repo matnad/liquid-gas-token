@@ -14,6 +14,7 @@ interface ILiquidERC20 is IERC20 {
     function poolTotalSupply() external view returns (uint256);
     function poolTokenReserves() external view returns (uint256);
     function poolBalanceOf(address account) external view returns (uint256);
+    function poolTransfer(address recipient, uint256 amount) external returns (bool);
     function addLiquidity(uint256 minLiquidity, uint256 maxTokens, uint256 deadline)
         external payable returns (uint256 liquidityCreated);
     function removeLiquidity(uint256 amount, uint256 minEth, uint256 minTokens, uint256 deadline)
@@ -49,5 +50,10 @@ interface ILiquidERC20 is IERC20 {
         address indexed provider,
         uint256 indexed eth_amount,
         uint256 indexed token_amount
+    );
+    event TransferLiquidity(
+        address indexed from,
+        address indexed to,
+        uint256 value
     );
 }
