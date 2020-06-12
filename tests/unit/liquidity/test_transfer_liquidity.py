@@ -5,6 +5,7 @@ from brownie import Wei
 DEADLINE = 9999999999999
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
+
 @pytest.fixture()
 def liquid_lgt(lgt, accounts):
     lgt.mint(50, {'from': accounts[0]})
@@ -27,6 +28,17 @@ def test_transfer_liquidity(liquid_lgt, accounts):
     assert event["value"] == transfer_amount
     assert sender_initial_liquidity - transfer_amount == liquid_lgt.poolBalanceOf(sender)
     assert recipient_initial_liquidity + transfer_amount == liquid_lgt.poolBalanceOf(recipient)
+
+
+def test_transfer_liquidity_insufficient_reverts(liquid_lgt, accounts):
+    sender, recipient = accounts[:2]
+    sender_initial_liquidity = liquid_lgt.poolBalanceOf(sender)
+    recipient_initial_liquidity = liquid_lgt.poolBalanceOf(recipient)
+    transfer_amount = Wei("1 ether")
+    with brownie.reverts("LGT: transfer exceeds balance"):
+        liquid_lgt.poolTransfer(recipient, transfer_amount, {'from': sender})
+    assert sender_initial_liquidity == liquid_lgt.poolBalanceOf(sender)
+    assert recipient_initial_liquidity == liquid_lgt.poolBalanceOf(recipient)
 
 
 def test_transfer_liquidity_self_reverts(liquid_lgt, accounts):
