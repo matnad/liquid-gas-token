@@ -209,7 +209,7 @@ contract LiquidERC20 is ERC20PointerSupply {
     {
         uint256 numerator = inputReserve.mul(outputAmount).mul(1000);
         uint256 denominator = outputReserve.sub(outputAmount).mul(995);
-        return (numerator / denominator).add(1);
+        return numerator.div(denominator).add(1);
     }
 
     // ***** Trade Ether to Tokens
