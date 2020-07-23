@@ -1,6 +1,6 @@
 from brownie import *
 
-from scripts.deploy_lgt import deploy_lgt
+from archive.deploy_lgt import deploy_lgt
 
 
 def main():

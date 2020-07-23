@@ -3,7 +3,7 @@ from brownie import *
 from brownie.utils import color
 from scripts.all_gts import main as get_all_gas_tokens
 
-TOKENS_MINT = 4
+TOKENS_MINT = 25
 TOKENS_FREE = 25
 BURN = 1000000
 DEADLINE = 999999999999
@@ -29,11 +29,11 @@ def main():
     out += f"\n  Minting {TOKENS_MINT} tokens:\n"
 
     tx = gst.mint(TOKENS_MINT, {'from': accounts[0]})
-    out += f"       {color('dark green')}GST2: {str(tx.gas_used).ljust(6)} gas (mint to balance){color}\n"
+    out += f"       GST2: {str(tx.gas_used).ljust(6)} gas\n"
     tx = chi.mint(TOKENS_MINT, {'from': accounts[0]})
-    out += f"        CHI: {str(tx.gas_used).ljust(6)} gas (mint to balance)\n"
+    out += f"        {color('dark green')}CHI: {str(tx.gas_used).ljust(6)} gas{color}\n"
     tx = lgt.mint(TOKENS_MINT, {'from': accounts[0]})
-    out += f"        LGT: {str(tx.gas_used).ljust(6)} gas (mint to balance)\n"
+    out += f"        LGT: {str(tx.gas_used).ljust(6)} gas\n"
     rpc.revert()
 
     # Minting and selling
@@ -41,26 +41,25 @@ def main():
 
     tx_mint = gst.mint(TOKENS_MINT, {'from': accounts[0]})
     tx_sell = gst_uniswap.tokenToEthSwapInput(TOKENS_MINT, 1, 9999999999, {'from': accounts[0]})
-    out += f"       GST2: {str(tx_mint.gas_used + tx_sell.gas_used).ljust(6)} gas (mint and sell)\n"
+    out += f"       GST2: {str(tx_mint.gas_used + tx_sell.gas_used).ljust(6)} gas\n"
 
     tx_mint = chi.mint(TOKENS_MINT, {'from': accounts[0]})
     tx_sell = chi_uniswap.tokenToEthSwapInput(TOKENS_MINT, 1, 9999999999, {'from': accounts[0]})
-    out += f"        CHI: {str(tx_mint.gas_used + tx_sell.gas_used).ljust(6)} gas (mint and sell)\n"
+    out += f"        CHI: {str(tx_mint.gas_used + tx_sell.gas_used).ljust(6)} gas\n"
 
     tx = lgt.mintToSell9630191(TOKENS_MINT, {'from': accounts[0]})
-    out += f"        {color('dark green')}LGT: {str(tx.gas_used).ljust(6)} gas (mint and sell){color}\n"
+    out += f"        {color('dark green')}LGT: {str(tx.gas_used).ljust(6)} gas{color}\n"
     rpc.revert()
 
     # Burn Gas and Free
     out += f"\n  Burning {BURN} gas and freeing {TOKENS_FREE} tokens:\n"
 
     tx = h.burnAndFreeGST(BURN, TOKENS_FREE, {'from': accounts[0]})
-    out += f"       GST2: {str(tx.gas_used).ljust(6)} gas (free from owned)\n"
+    out += f"       GST2: {str(tx.gas_used).ljust(6)} gas\n"
     tx = h.burnAndFreeCHI(BURN, TOKENS_FREE, {'from': accounts[0]})
-    out += f"        CHI: {str(tx.gas_used).ljust(6)} gas (free from owned)\n"
-    price = lgt.getEthToTokenOutputPrice(TOKENS_FREE)
+    out += f"        CHI: {str(tx.gas_used).ljust(6)} gas\n"
     tx = h.burnAndFree(BURN, TOKENS_FREE, {'from': accounts[0]})
-    out += f"        {color('dark green')}LGT: {str(tx.gas_used).ljust(6)} gas (free from owned){color}\n"
+    out += f"        {color('dark green')}LGT: {str(tx.gas_used).ljust(6)} gas{color}\n"
     rpc.revert()
 
     # Buy Tokens Burn Gas And Free
@@ -69,16 +68,16 @@ def main():
     price = gst_uniswap.getEthToTokenOutputPrice(TOKENS_FREE)
     tx_buy = gst_uniswap.ethToTokenSwapOutput(TOKENS_FREE, 9999999999, {'from': accounts[0], 'value': price})
     tx_free = h.burnAndFreeGST(BURN, TOKENS_FREE, {'from': accounts[0]})
-    out += f"       GST2: {str(tx_buy.gas_used + tx_free.gas_used).ljust(6)} gas (buy and free)\n"
+    out += f"       GST2: {str(tx_buy.gas_used + tx_free.gas_used).ljust(6)} gas\n"
 
     price = chi_uniswap.getEthToTokenOutputPrice(TOKENS_FREE)
     tx_buy = chi_uniswap.ethToTokenSwapOutput(TOKENS_FREE, 9999999999, {'from': accounts[0], 'value': price})
     tx_free = h.burnAndFreeCHI(BURN, TOKENS_FREE, {'from': accounts[0]})
-    out += f"        CHI: {str(tx_buy.gas_used + tx_free.gas_used).ljust(6)} gas (buy and free)\n"
+    out += f"        CHI: {str(tx_buy.gas_used + tx_free.gas_used).ljust(6)} gas\n"
 
     price = lgt.getEthToTokenOutputPrice(TOKENS_FREE)
     tx = h.burnBuyAndFreeOpt(BURN, TOKENS_FREE, {'from': accounts[0], 'value': price})
-    out += f"        {color('dark green')}LGT: {str(tx.gas_used).ljust(6)} gas (buy and free){color}\n"
+    out += f"        {color('dark green')}LGT: {str(tx.gas_used).ljust(6)} gas{color}\n"
     rpc.revert()
 
     print(out)

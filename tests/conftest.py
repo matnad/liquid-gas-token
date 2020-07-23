@@ -10,11 +10,12 @@ def isolate(fn_isolation):
 
 
 @pytest.fixture(scope="module")
-def lgt(LiquidGasToken, accounts):
-    # lgt_deployer = accounts.add("0x7d4cbcfd42fe584226a17f385f734b046090f3e9d9fd95b2e10ef53acbbc39e2")
-    lgt_deployer = accounts[-1]
-    accounts[9].transfer(lgt_deployer, "1 ether")
-    accounts[9].transfer("0x0000000000004946c0e9F43F4Dee607b0eF1fA1c", "0.001 ether")
-    lgt = lgt_deployer.deploy(LiquidGasToken)
+def lgt(LiquidGasToken, LGTDeployer, accounts):
+    salt = "0x23ad710e5baee63bb004d962a84d3922e236c107944f2efe53e42d51e6d6f121"
+    coffee = accounts.add("redacted")
+    d = coffee.deploy(LGTDeployer)  # 0x8EE26bA26c87Beb287eB71245ADEf44ede1bF190
+    accounts[0].transfer("0x000000000000C1CB11D5c062901F32D06248CE48", "0.001 ether")
+    d.deploy(salt)
+    lgt = LiquidGasToken.at("0x000000000000C1CB11D5c062901F32D06248CE48")
     lgt.mint(30, {'from': accounts[0]})
     yield lgt

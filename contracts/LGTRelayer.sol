@@ -6,7 +6,7 @@ import "OpenZeppelin/openzeppelin-contracts@3.0.1/contracts/math/SafeMath.sol";
 
 contract LGTRelayer {
     using SafeMath for uint256;
-    ILGT public constant lgt = ILGT(0x000000000049091F98692b2460500B6D133ae31F);
+    ILGT public constant lgt = ILGT(0x000000000000C1CB11D5c062901F32D06248CE48);
 
     /// @notice Forward a call, buy and free as many tokens as possible for the fixed
     ///         amount of ether - `value` sent with this transaction.
