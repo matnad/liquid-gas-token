@@ -5,6 +5,12 @@ Master Thesis Project of **Matthias Nadler**, University of Basel
 Supervised by **Prof. Dr. Fabian Schär**, Credit Suisse Asset Management (Schweiz) Professor for Distributed Ledger Technologies and
 Fintech Center for Innovative Finance, University of Basel
 
+[Read the full thesis, including the LGT Whitepaper.](thesis/LiquidGasToken_Nadler2020.pdf)
+
+## Liquid Gas Token Exchange dApp
+
+Visit [lgt.exchange](https://lgt.exchange) to start saving gas on your transactions and deployments today!
+
 ## Introduction
 
 The Liquid Gas Token (LGT) combines an ERC20 Gas Token (as popularized by [gastoken.io](https://gastoken.io/) and later
@@ -80,9 +86,10 @@ brownie run benchmarks/gas_token_comparison --network mainnet-fork
 
 ## Project Status
 
-**This repository is still a work in progress and has not undergone a formal audit**. Comments, questions, criticisms and pull requests are welcomed. Feel free to reach out on [Gitter](https://gitter.im/matnad).
+The LGT smart contract is deployed on the Ethereum Main Net, Kovan and Ropsten at the address: [0x000000000000C1CB11D5c062901F32D06248CE48](https://etherscan.io/address/0x000000000000c1cb11d5c062901f32d06248ce48).
 
-The contract will be deployed on the test and main nets soon and the addresses will be posted here.
+**This repository has not undergone a formal audit**. Comments, questions, criticisms and pull requests are welcomed. Feel free to reach out on [Gitter](https://gitter.im/matnad).
+
 
 ## License
 
