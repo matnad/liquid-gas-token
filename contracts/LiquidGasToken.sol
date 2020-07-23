@@ -16,46 +16,45 @@ contract LiquidGasToken is LiquidERC20 {
     ///      Pass _totalMinted as `i`
     function _createContracts(uint256 amount, uint256 i) internal {
         assembly {
-            // mstore(0, 0x756e<15 byte address>3318585733ff6000526016600af300)
             let end := add(i, amount)
             mstore(0,
                 add(
                     add(
-                        0x756e000000000000000000000000000000000000000000000000000000000000,
-                        shl(0x78, address())
+                        0x746d000000000000000000000000000000000000000000000000000000000000,
+                        shl(0x80, address())
                         ),
-                    0x3318585733ff6000526016600af300
+                    0x3318585733ff6000526015600bf30000
                 )
             )
             for {let j := div(amount, 32)} j {j := sub(j, 1)} {
-                pop(create2(0, 0, 32, add(i, 0))) pop(create2(0, 0, 32, add(i, 1)))
-                pop(create2(0, 0, 32, add(i, 2))) pop(create2(0, 0, 32, add(i, 3)))
-                pop(create2(0, 0, 32, add(i, 4))) pop(create2(0, 0, 32, add(i, 5)))
-                pop(create2(0, 0, 32, add(i, 6))) pop(create2(0, 0, 32, add(i, 7)))
-                pop(create2(0, 0, 32, add(i, 8))) pop(create2(0, 0, 32, add(i, 9)))
-                pop(create2(0, 0, 32, add(i, 10))) pop(create2(0, 0, 32, add(i, 11)))
-                pop(create2(0, 0, 32, add(i, 12))) pop(create2(0, 0, 32, add(i, 13)))
-                pop(create2(0, 0, 32, add(i, 14))) pop(create2(0, 0, 32, add(i, 15)))
-                pop(create2(0, 0, 32, add(i, 16))) pop(create2(0, 0, 32, add(i, 17)))
-                pop(create2(0, 0, 32, add(i, 18))) pop(create2(0, 0, 32, add(i, 19)))
-                pop(create2(0, 0, 32, add(i, 20))) pop(create2(0, 0, 32, add(i, 21)))
-                pop(create2(0, 0, 32, add(i, 22))) pop(create2(0, 0, 32, add(i, 23)))
-                pop(create2(0, 0, 32, add(i, 24))) pop(create2(0, 0, 32, add(i, 25)))
-                pop(create2(0, 0, 32, add(i, 26))) pop(create2(0, 0, 32, add(i, 27)))
-                pop(create2(0, 0, 32, add(i, 28))) pop(create2(0, 0, 32, add(i, 29)))
-                pop(create2(0, 0, 32, add(i, 30))) pop(create2(0, 0, 32, add(i, 31)))
+                pop(create2(0, 0, 30, add(i, 0))) pop(create2(0, 0, 30, add(i, 1)))
+                pop(create2(0, 0, 30, add(i, 2))) pop(create2(0, 0, 30, add(i, 3)))
+                pop(create2(0, 0, 30, add(i, 4))) pop(create2(0, 0, 30, add(i, 5)))
+                pop(create2(0, 0, 30, add(i, 6))) pop(create2(0, 0, 30, add(i, 7)))
+                pop(create2(0, 0, 30, add(i, 8))) pop(create2(0, 0, 30, add(i, 9)))
+                pop(create2(0, 0, 30, add(i, 10))) pop(create2(0, 0, 30, add(i, 11)))
+                pop(create2(0, 0, 30, add(i, 12))) pop(create2(0, 0, 30, add(i, 13)))
+                pop(create2(0, 0, 30, add(i, 14))) pop(create2(0, 0, 30, add(i, 15)))
+                pop(create2(0, 0, 30, add(i, 16))) pop(create2(0, 0, 30, add(i, 17)))
+                pop(create2(0, 0, 30, add(i, 18))) pop(create2(0, 0, 30, add(i, 19)))
+                pop(create2(0, 0, 30, add(i, 20))) pop(create2(0, 0, 30, add(i, 21)))
+                pop(create2(0, 0, 30, add(i, 22))) pop(create2(0, 0, 30, add(i, 23)))
+                pop(create2(0, 0, 30, add(i, 24))) pop(create2(0, 0, 30, add(i, 25)))
+                pop(create2(0, 0, 30, add(i, 26))) pop(create2(0, 0, 30, add(i, 27)))
+                pop(create2(0, 0, 30, add(i, 28))) pop(create2(0, 0, 30, add(i, 29)))
+                pop(create2(0, 0, 30, add(i, 30))) pop(create2(0, 0, 30, add(i, 31)))
                 i := add(i, 32)
             }
 
             for { } lt(i, end) { i := add(i, 1) } {
-                pop(create2(0, 0, 32, i))
+                pop(create2(0, 0, 30, i))
             }
             sstore(_totalMinted_slot, end)
         }
     }
 
     /// @dev calculate the address of a child contract given its salt
-    function computeAddress2(uint256 salt) external view returns (address) {
+    function computeAddress2(uint256 salt) external view returns (address child) {
         assembly {
             let data := mload(0x40)
             mstore(data,
@@ -68,15 +67,14 @@ contract LiquidGasToken is LiquidERC20 {
             mstore(add(data, 53),
                 add(
                     add(
-                        0x756e000000000000000000000000000000000000000000000000000000000000,
-                        shl(0x78, address())
+                        0x746d000000000000000000000000000000000000000000000000000000000000,
+                        shl(0x80, address())
                     ),
-                    0x3318585733ff6000526016600af300
+                    0x3318585733ff6000526015600bf30000
                 )
             )
-            mstore(add(data, 53), keccak256(add(data, 53), 32))
-            mstore(data, and(keccak256(data, 85), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF))
-            return(data, 32)
+            mstore(add(data, 53), keccak256(add(data, 53), 30))
+            child := and(keccak256(data, 85), 0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF)
         }
     }
 
@@ -96,13 +94,13 @@ contract LiquidGasToken is LiquidERC20 {
             mstore(add(data, 53),
                 add(
                     add(
-                        0x756e000000000000000000000000000000000000000000000000000000000000,
-                        shl(0x78, address())
+                        0x746d000000000000000000000000000000000000000000000000000000000000,
+                        shl(0x80, address())
                     ),
-                    0x3318585733ff6000526016600af300
+                    0x3318585733ff6000526015600bf30000
                 )
             )
-            mstore(add(data, 53), keccak256(add(data, 53), 32))
+            mstore(add(data, 53), keccak256(add(data, 53), 30))
             let ptr := add(data, 21)
             for { } lt(i, end) { i := add(i, 1) } {
                 mstore(ptr, i)

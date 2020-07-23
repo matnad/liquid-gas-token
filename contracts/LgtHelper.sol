@@ -8,7 +8,7 @@ import "../interfaces/ICHI.sol";
 contract LgtHelper {
     uint256 public c = 1;
 
-    ILGT public constant lgt = ILGT(0x000000000049091F98692b2460500B6D133ae31F);
+    ILGT public constant lgt = ILGT(0x000000000000C1CB11D5c062901F32D06248CE48);
     ICHI public constant chi = ICHI(0x0000000000004946c0e9F43F4Dee607b0eF1fA1c);
     IGST public constant gst = IGST(0x0000000000b3F879cb30FE243b4Dfee438691c04);
 

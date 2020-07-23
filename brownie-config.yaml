@@ -4,6 +4,8 @@ autofetch_sources: true
 networks:
   development:
     gas_price: 0
+    cmd_settings:
+      unlock: 0x7E1E3334130355799F833ffec2D731BCa3E68aF6
 
 compiler:
     solc:
